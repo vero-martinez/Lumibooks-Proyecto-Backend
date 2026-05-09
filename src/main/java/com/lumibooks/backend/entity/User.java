@@ -9,16 +9,18 @@ import com.lumibooks.backend.enums.RoleUser;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Table(name = "usuarios")
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "usuarios")
 public class User {
 
     @Id
@@ -46,7 +48,8 @@ public class User {
 
     @Column(name = "telefono", length = 9)
     private String telefono;
-
+    
+    @Builder.Default
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 

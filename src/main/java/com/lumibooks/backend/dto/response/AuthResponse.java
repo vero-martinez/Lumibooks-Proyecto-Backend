@@ -1,11 +1,13 @@
 package com.lumibooks.backend.dto.response;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 /**
  * Clase DTO (Data Transfer Object) para enviar los datos de respuesta de autenticación.
@@ -17,6 +19,7 @@ import lombok.Setter;
 public class AuthResponse {
 
     private String token; // Token JWT generado para el usuario autenticado
+    @Builder.Default
     private String tokenType = "Bearer"; // Tipo de token, generalmente "Bearer"
     private String email; // Email del usuario autenticado
     private String nombre; // Nombre del usuario autenticado
