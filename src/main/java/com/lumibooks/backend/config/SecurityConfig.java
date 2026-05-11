@@ -9,6 +9,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 /**
@@ -35,8 +36,9 @@ public class SecurityConfig {
 
     @Bean
     // Configurar la cadena de filtros de seguridad para proteger las rutas de la aplicación
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource)) // Configurar CORS con la configuración definida en CorsConfig
                 .csrf(csrf -> csrf.disable()) // Deshabilitar CSRF ya que se usará JWT para la autenticación
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Configurar la gestión de sesiones para que sea sin estado (stateless)
                 .authorizeHttpRequests(authorize -> authorize // Permitir el acceso a las rutas de autenticación sin necesidad de estar autenticado
