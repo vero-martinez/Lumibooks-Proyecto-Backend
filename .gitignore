@@ -29,6 +29,9 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### No subir archivos de configuración sensibles ###
+.env
+
 ### VS Code ###
 .vscode/
 
