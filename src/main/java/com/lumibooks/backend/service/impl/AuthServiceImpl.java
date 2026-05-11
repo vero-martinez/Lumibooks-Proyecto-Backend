@@ -14,39 +14,44 @@ import com.lumibooks.backend.enums.RoleUser;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.repository.UserRepository;
+import com.lumibooks.backend.security.JwtTokenProvider;
 import com.lumibooks.backend.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Implementación del servicio de autenticación.
+ * Se encarga del registro de usuarios,
+ * validación de credenciales y generación de tokens JWT.
+ */
 @Service
 @RequiredArgsConstructor
-/**
- * Implementación de la interfaz AuthService para gestionar la autenticación de usuarios.
- * Funciones principales:
- * - Registrar nuevos usuarios con validación de email y DNI únicos.
- * - Autenticar usuarios existentes mediante email y contraseña.
- * - Generar respuestas de autenticación con datos del usuario y mensajes de confirmación.
- */
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepository userRepository; // Repositorio para acceder a los datos de los usuarios en la base de datos
-    private final PasswordEncoder passwordEncoder; // Para encriptar las contraseñas de los usuarios
-    private final AuthenticationManager authenticationManager; // Para autenticar a los usuarios durante el login
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
+    /**
+     * Registra un nuevo usuario en el sistema.
+     *
+     * @param registerRequest datos del usuario a registrar
+     * @return respuesta con token JWT y datos del usuario registrado
+     * @throws BadRequestException si el email o DNI ya existen
+     */
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest registerRequest) {
-        
-        // Validar que el email no esté registrado
+
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new BadRequestException("El email ya está registrado");
         }
-        // Validar que el DNI no esté registrado
+
         if (userRepository.existsByDni(registerRequest.getDni())) {
             throw new BadRequestException("El DNI ya está registrado");
         }
-        
-        // Crear un nuevo usuario con los datos proporcionados y el rol CLIENTE
+
         User newUser = User.builder()
                 .nombre(registerRequest.getNombre())
                 .apellido(registerRequest.getApellido())
@@ -58,12 +63,13 @@ public class AuthServiceImpl implements AuthService {
                 .activo(true)
                 .build();
 
-        // Guardar el nuevo usuario en la base de datos
         User savedUser = userRepository.save(newUser);
-        
-        // Retornar una respuesta de autenticación con los datos del usuario registrado
+
+        // Genera el token JWT del usuario registrado
+        String token = jwtTokenProvider.generateToken(savedUser.getEmail());
+
         return AuthResponse.builder()
-                .token(null)
+                .token(token)
                 .nombre(savedUser.getNombre())
                 .apellido(savedUser.getApellido())
                 .email(savedUser.getEmail())
@@ -72,15 +78,21 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    /**
+     * Autentica un usuario existente.
+     *
+     * @param loginRequest credenciales del usuario
+     * @return respuesta con token JWT y datos del usuario autenticado
+     * @throws ResourceNotFoundException si el usuario no existe
+     * @throws BadRequestException si las credenciales son incorrectas
+     */
     @Override
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest loginRequest) {
-        
-        // Buscar el usuario por email, lanzar excepción si no se encuentra
+
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-        
-        // Intentar autenticar al usuario con el email y contraseña proporcionados si la autenticación falla, lanzar excepción
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -91,10 +103,12 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             throw new BadRequestException("Email o contraseña incorrectos");
         }
-        
-        // Retornar una respuesta de autenticación con los datos del usuario autenticado
+
+        // Genera el token JWT del usuario autenticado
+        String token = jwtTokenProvider.generateToken(user.getEmail());
+
         return AuthResponse.builder()
-                .token(null)
+                .token(token)
                 .nombre(user.getNombre())
                 .apellido(user.getApellido())
                 .email(user.getEmail())
