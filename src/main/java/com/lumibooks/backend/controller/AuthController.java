@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
  * Maneja las operaciones de registro e inicio de sesión.
  */
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
