@@ -17,12 +17,12 @@ import lombok.Setter;
  * DTO para enviar los datos de una editorial al cliente.
  * Contiene la información que se desea exponer sobre una editorial.
  */
-public class EditorialResponse {
+public class PublisherResponse {
 
     private Long id;
-    private String nombre;
-    private Boolean activo;
-    private LocalDateTime fechaCreacion;
-    private LocalDateTime fechaActualizacion;
+    private String name;
+    private Boolean isActive;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     
 }

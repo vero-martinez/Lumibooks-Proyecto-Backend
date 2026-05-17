@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.lumibooks.backend.dto.request.EditorialRequest;
-import com.lumibooks.backend.dto.response.EditorialResponse;
-import com.lumibooks.backend.service.EditorialService;
+import com.lumibooks.backend.dto.request.PublisherRequest;
+import com.lumibooks.backend.dto.response.PublisherResponse;
+import com.lumibooks.backend.service.PublisherService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +20,11 @@ import lombok.RequiredArgsConstructor;
  * Solo accesible por usuarios con rol ADMIN.
  */
 @RestController
-@RequestMapping("/api/admin/editorials")
+@RequestMapping("/api/admin/publishers")
 @RequiredArgsConstructor
-public class EditorialController {
+public class PublisherController {
 
-    private final EditorialService editorialService;
+    private final PublisherService publisherService;
 
     /**
      * Crea una nueva editorial.
@@ -33,10 +33,10 @@ public class EditorialController {
      * @return editorial creada
      */
     @PostMapping
-    public ResponseEntity<EditorialResponse> create(
-            @Valid @RequestBody EditorialRequest request) {
+    public ResponseEntity<PublisherResponse> create(
+            @Valid @RequestBody PublisherRequest request) {
 
-        EditorialResponse response = editorialService.create(request);
+        PublisherResponse response = publisherService.create(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -48,27 +48,27 @@ public class EditorialController {
      * @return editorial encontrada
      */
     @GetMapping("/{id}")
-    public ResponseEntity<EditorialResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<PublisherResponse> getById(@PathVariable Long id) {
 
-        EditorialResponse response = editorialService.getById(id);
+        PublisherResponse response = publisherService.getById(id);
         return ResponseEntity.ok(response);
     }
 
     /**
      * Lista editoriales aplicando filtros opcionales y paginación.
      *
-     * @param nombre   filtro por nombre
-     * @param activo   filtro por estado activo/inactivo
+     * @param name   filtro por nombre
+     * @param isActive   filtro por estado activo/inactivo
      * @param pageable configuración de paginación
      * @return lista paginada de editoriales
      */
     @GetMapping
-    public ResponseEntity<Page<EditorialResponse>> getAll(
-            @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) Boolean activo,
-            @PageableDefault(size = 10, sort = "fechaCreacion", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<Page<PublisherResponse>> getAll(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Boolean isActive,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<EditorialResponse> response = editorialService.getAll(nombre, activo, pageable);
+        Page<PublisherResponse> response = publisherService.getAll(name, isActive, pageable);
 
         return ResponseEntity.ok(response);
     }
@@ -81,11 +81,11 @@ public class EditorialController {
      * @return editorial actualizada
      */
     @PutMapping("/{id}")
-    public ResponseEntity<EditorialResponse> update(
+    public ResponseEntity<PublisherResponse> update(
             @PathVariable Long id,
-            @Valid @RequestBody EditorialRequest request) {
+            @Valid @RequestBody PublisherRequest request) {
 
-        EditorialResponse response = editorialService.update(id, request);
+        PublisherResponse response = publisherService.update(id, request);
         return ResponseEntity.ok(response);
     }
 
@@ -98,7 +98,7 @@ public class EditorialController {
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
 
-        editorialService.deactivate(id);
+        publisherService.deactivate(id);
 
         return ResponseEntity.noContent().build();
     }
@@ -112,7 +112,7 @@ public class EditorialController {
     @PatchMapping("/{id}/activate")
     public ResponseEntity<Void> activate(@PathVariable Long id) {
 
-        editorialService.activate(id);
+        publisherService.activate(id);
 
         return ResponseEntity.noContent().build();
     }
