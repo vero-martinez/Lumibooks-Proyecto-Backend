@@ -15,7 +15,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EditorialRequest {
+public class PublisherRequest {
 
     /**
      * Nombre de la editorial.
@@ -23,5 +23,5 @@ public class EditorialRequest {
      */
     @NotBlank(message = "El nombre de la editorial es obligatorio")
     @Size(max = 150, message = "El nombre no puede superar los 150 caracteres")
-    private String nombre;
+    private String name;
 }

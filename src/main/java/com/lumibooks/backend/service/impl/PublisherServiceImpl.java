@@ -5,13 +5,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lumibooks.backend.dto.request.EditorialRequest;
-import com.lumibooks.backend.dto.response.EditorialResponse;
-import com.lumibooks.backend.entity.Editorial;
+import com.lumibooks.backend.dto.request.PublisherRequest;
+import com.lumibooks.backend.dto.response.PublisherResponse;
+import com.lumibooks.backend.entity.Publisher;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
-import com.lumibooks.backend.repository.EditorialRepository;
-import com.lumibooks.backend.service.EditorialService;
+import com.lumibooks.backend.repository.PublisherRepository;
+import com.lumibooks.backend.service.PublisherService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,9 +22,9 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
-public class EditorialServiceImpl implements EditorialService {
+public class PublisherServiceImpl implements PublisherService {
 
-    private final EditorialRepository editorialRepository;
+    private final PublisherRepository publisherRepository;
 
     /**
      * Crea una nueva editorial validando que no exista otra con el mismo nombre.
@@ -34,18 +34,18 @@ public class EditorialServiceImpl implements EditorialService {
      */
     @Override
     @Transactional
-    public EditorialResponse create(EditorialRequest request) {
+    public PublisherResponse create(PublisherRequest request) {
         
-        if (editorialRepository.existsByNombreIgnoreCase(request.getNombre())) {
+        if (publisherRepository.existsByNameIgnoreCase(request.getName())) {
             throw new BadRequestException("Ya existe una editorial con ese nombre");
         }
 
-        Editorial editorial = Editorial.builder()
-                .nombre(request.getNombre())
-                .activo(true)
+        Publisher publisher = Publisher.builder()
+                .name(request.getName())
+                .isActive(true)
                 .build();
 
-        Editorial saved = editorialRepository.save(editorial);
+        Publisher saved = publisherRepository.save(publisher);
         return mapToResponse(saved);
     }
 
@@ -57,28 +57,28 @@ public class EditorialServiceImpl implements EditorialService {
      */
     @Override
     @Transactional(readOnly = true)
-    public EditorialResponse getById(Long id) {
+    public PublisherResponse getById(Long id) {
         
-        Editorial editorial = editorialRepository.findById(id)
+        Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
 
-        return mapToResponse(editorial);
+        return mapToResponse(publisher);
     }
 
     /**
      * Obtiene una lista paginada de editoriales aplicando filtros opcionales.
      *
-     * @param nombre filtro por nombre (opcional)
-     * @param activo filtro por estado activo/inactivo (opcional)
+     * @param name filtro por nombre (opcional)
+     * @param isActive filtro por estado activo/inactivo (opcional)
      * @param pageable configuración de paginación
      * @return página de editoriales filtradas
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<EditorialResponse> getAll(String nombre, Boolean activo, Pageable pageable) {
+    public Page<PublisherResponse> getAll(String name, Boolean isActive, Pageable pageable) {
         
-        Page<Editorial> editorials = editorialRepository.findByFilters(nombre, activo, pageable);
-        return editorials.map(this::mapToResponse);
+        Page<Publisher> publishers = publisherRepository.findByFilters(name, isActive, pageable);
+        return publishers.map(this::mapToResponse);
     }
 
     /**
@@ -90,18 +90,18 @@ public class EditorialServiceImpl implements EditorialService {
      */
     @Override
     @Transactional
-    public EditorialResponse update(Long id, EditorialRequest request) {
+    public PublisherResponse update(Long id, PublisherRequest request) {
         
-        Editorial editorial = editorialRepository.findById(id)
+        Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
 
-        if (!editorial.getNombre().equalsIgnoreCase(request.getNombre()) &&
-            editorialRepository.existsByNombreIgnoreCase(request.getNombre())) {
+        if (!publisher.getName().equalsIgnoreCase(request.getName()) &&
+            publisherRepository.existsByNameIgnoreCase(request.getName())) {
             throw new BadRequestException("Ya existe una editorial con ese nombre");
         }
 
-        editorial.setNombre(request.getNombre());
-        Editorial updated = editorialRepository.save(editorial);
+        publisher.setName(request.getName());
+        Publisher updated = publisherRepository.save(publisher);
         
         return mapToResponse(updated);
     }
@@ -115,15 +115,15 @@ public class EditorialServiceImpl implements EditorialService {
     @Transactional
     public void deactivate(Long id) {
         
-        Editorial editorial = editorialRepository.findById(id)
+        Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
 
-        if (!editorial.getActivo()) {
+        if (!publisher.getIsActive()) {
             throw new BadRequestException("La editorial ya está desactivada");
         }
 
-        editorial.setActivo(false);
-        editorialRepository.save(editorial);
+        publisher.setIsActive(false);
+        publisherRepository.save(publisher);
     }
 
     /**
@@ -135,30 +135,30 @@ public class EditorialServiceImpl implements EditorialService {
     @Transactional
     public void activate(Long id) {
         
-        Editorial editorial = editorialRepository.findById(id)
+        Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
 
-        if (editorial.getActivo()) {
+        if (publisher.getIsActive()) {
             throw new BadRequestException("La editorial ya está activa");
         }
 
-        editorial.setActivo(true);
-        editorialRepository.save(editorial);
+        publisher.setIsActive(true);
+        publisherRepository.save(publisher);
     }
 
     /**
-     * Convierte una entidad Editorial a su DTO de respuesta.
+     * Convierte una entidad Publisher a su DTO de respuesta.
      *
-     * @param editorial entidad a convertir
+     * @param publisher entidad a convertir
      * @return DTO de respuesta
      */
-    private EditorialResponse mapToResponse(Editorial editorial) {
-        return EditorialResponse.builder()
-                .id(editorial.getId())
-                .nombre(editorial.getNombre())
-                .activo(editorial.getActivo())
-                .fechaCreacion(editorial.getFechaCreacion())
-                .fechaActualizacion(editorial.getFechaActualizacion())
+    private PublisherResponse mapToResponse(Publisher publisher) {
+        return PublisherResponse.builder()
+                .id(publisher.getId())
+                .name(publisher.getName())
+                .isActive(publisher.getIsActive())
+                .createdAt(publisher.getCreatedAt())
+                .updatedAt(publisher.getUpdatedAt())
                 .build();
     }
 }

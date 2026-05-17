@@ -7,37 +7,37 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.lumibooks.backend.entity.Editorial;
+import com.lumibooks.backend.entity.Publisher;
 
 @Repository
-public interface EditorialRepository extends JpaRepository<Editorial, Long> {
+public interface PublisherRepository extends JpaRepository<Publisher, Long> {
 
         /**
          * Verifica si existe una editorial por nombre ignorando mayúsculas y
          * minúsculas.
          *
-         * @param nombre nombre de la editorial a verificar
+         * @param name nombre de la editorial a verificar
          * @return true si existe, false si no existe
          */
-        boolean existsByNombreIgnoreCase(String nombre);
+        boolean existsByNameIgnoreCase(String name);
 
         /**
          * Obtiene una lista paginada de editoriales aplicando filtros opcionales.
          * Si el nombre es null no se filtra por nombre.
          * Si activo es null no se filtra por estado.
          *
-         * @param nombre   filtro por nombre (opcional)
-         * @param activo   filtro por estado activo o inactivo (opcional)
+         * @param name   filtro por nombre (opcional)
+         * @param isActive   filtro por estado activo o inactivo (opcional)
          * @param pageable configuración de paginación
          * @return página de editoriales filtradas
          */
         @Query("""
-                            SELECT e FROM Editorial e
-                            WHERE (:nombre IS NULL OR e.nombre ILIKE %:nombre%)
-                            AND (:activo IS NULL OR e.activo = :activo)
+                            SELECT e FROM Publisher e
+                            WHERE (:name IS NULL OR e.name ILIKE %:name%)
+                            AND (:isActive IS NULL OR e.isActive = :isActive)
                         """)
-        Page<Editorial> findByFilters(
-                        @Param("nombre") String nombre,
-                        @Param("activo") Boolean activo,
+        Page<Publisher> findByFilters(
+                        @Param("name") String name,
+                        @Param("isActive") Boolean isActive,
                         Pageable pageable);
 }
