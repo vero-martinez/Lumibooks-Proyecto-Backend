@@ -57,18 +57,18 @@ public class CategoryController {
     /**
      * Lista categorías aplicando filtros opcionales y paginación.
      *
-     * @param nombre   filtro por nombre
-     * @param activo   filtro por estado activo/inactivo
+     * @param name   filtro por nombre
+     * @param isActive   filtro por estado activo/inactivo
      * @param pageable configuración de paginación
      * @return lista paginada de categorías
      */
     @GetMapping
     public ResponseEntity<Page<CategoryResponse>> getAll(
-            @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) Boolean activo,
-            @PageableDefault(size = 10, sort = "fechaCreacion", direction = Sort.Direction.DESC) Pageable pageable) {
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Boolean isActive,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<CategoryResponse> response = categoryService.getAll(nombre, activo, pageable);
+        Page<CategoryResponse> response = categoryService.getAll(name, isActive, pageable);
 
         return ResponseEntity.ok(response);
     }

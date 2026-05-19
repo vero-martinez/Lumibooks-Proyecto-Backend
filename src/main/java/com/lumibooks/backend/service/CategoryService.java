@@ -20,11 +20,11 @@ public interface CategoryService {
 
     /**
      * Obtener todas las categorías con filtros dinámicos
-     * @param nombre Buscar por nombre (opcional)
-     * @param activo Filtrar por estado activo/inactivo (opcional)
+     * @param name   Buscar por nombre (opcional)
+     * @param isActive Filtrar por estado activo/inactivo (opcional)
      * @param pageable Paginación y ordenamiento
      */
-    Page<CategoryResponse> getAll(String nombre, Boolean activo, Pageable pageable);
+    Page<CategoryResponse> getAll(String name, Boolean isActive, Pageable pageable);
 
     /**
      * Actualizar una categoría

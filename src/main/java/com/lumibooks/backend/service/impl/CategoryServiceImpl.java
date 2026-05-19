@@ -36,13 +36,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryResponse create(CategoryRequest request) {
         
-        if (categoryRepository.existsByNombreIgnoreCase(request.getNombre())) {
+        if (categoryRepository.existsByNameIgnoreCase(request.getName())) {
             throw new BadRequestException("Ya existe una categoría con ese nombre");
         }
 
         Category category = Category.builder()
-                .nombre(request.getNombre())
-                .activo(true)
+                .name(request.getName())
+                .isActive(true)
                 .build();
 
         Category saved = categoryRepository.save(category);
@@ -68,16 +68,16 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * Obtiene una lista paginada de categorías aplicando filtros opcionales.
      *
-     * @param nombre filtro por nombre (opcional)
-     * @param activo filtro por estado activo/inactivo (opcional)
+     * @param name   filtro por nombre (opcional)
+     * @param isActive filtro por estado activo/inactivo (opcional)
      * @param pageable configuración de paginación
      * @return página de categorías filtradas
      */
     @Override
     @Transactional(readOnly = true)
-    public Page<CategoryResponse> getAll(String nombre, Boolean activo, Pageable pageable) {
+    public Page<CategoryResponse> getAll(String name, Boolean isActive, Pageable pageable) {
         
-        Page<Category> categories = categoryRepository.findByFilters(nombre, activo, pageable);
+        Page<Category> categories = categoryRepository.findByFilters(name, isActive, pageable);
         return categories.map(this::mapToResponse);
     }
 
@@ -95,12 +95,12 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
-        if (!category.getNombre().equalsIgnoreCase(request.getNombre()) &&
-            categoryRepository.existsByNombreIgnoreCase(request.getNombre())) {
+        if (!category.getName().equalsIgnoreCase(request.getName()) &&
+            categoryRepository.existsByNameIgnoreCase(request.getName())) {
             throw new BadRequestException("Ya existe una categoría con ese nombre");
         }
 
-        category.setNombre(request.getNombre());
+        category.setName(request.getName());
         Category updated = categoryRepository.save(category);
         
         return mapToResponse(updated);
@@ -118,11 +118,11 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
-        if (!category.getActivo()) {
+        if (!category.getIsActive()) {
             throw new BadRequestException("La categoría ya está desactivada");
         }
 
-        category.setActivo(false);
+        category.setIsActive(false);
         categoryRepository.save(category);
     }
 
@@ -138,11 +138,11 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
-        if (category.getActivo()) {
+        if (category.getIsActive()) {
             throw new BadRequestException("La categoría ya está activa");
         }
 
-        category.setActivo(true);
+        category.setIsActive(true);
         categoryRepository.save(category);
     }
 
@@ -155,10 +155,10 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryResponse mapToResponse(Category category) {
         return CategoryResponse.builder()
                 .id(category.getId())
-                .nombre(category.getNombre())
-                .activo(category.getActivo())
-                .fechaCreacion(category.getFechaCreacion())
-                .fechaActualizacion(category.getFechaActualizacion())
+                .name(category.getName())
+                .isActive(category.getIsActive())
+                .createdAt(category.getCreatedAt())
+                .updatedAt(category.getUpdatedAt())
                 .build();
     }
 }

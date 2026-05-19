@@ -17,9 +17,9 @@ import lombok.Setter;
 public class CategoryResponse {
 
     private Long id;
-    private String nombre;
-    private Boolean activo;
-    private LocalDateTime fechaCreacion;
-    private LocalDateTime fechaActualizacion;
+    private String name;
+    private Boolean isActive;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     
 }

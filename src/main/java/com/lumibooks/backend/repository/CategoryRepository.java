@@ -17,29 +17,29 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * Verifica si existe una categoría por nombre ignorando mayúsculas y
      * minúsculas.
      *
-     * @param nombre nombre de la categoría a verificar
+     * @param name nombre de la categoría a verificar
      * @return true si existe, false si no existe
      */
-    boolean existsByNombreIgnoreCase(String nombre);
+    boolean existsByNameIgnoreCase(String name);
 
     /**
      * Obtiene una lista paginada de categorias aplicando filtros opcionales.
      * Si el nombre es null no se filtra por nombre.
      * Si activo es null no se filtra por estado.
      *
-     * @param nombre   filtro por nombre (opcional)
-     * @param activo   filtro por estado activo o inactivo (opcional)
+     * @param name   filtro por nombre (opcional)
+     * @param isActive   filtro por estado activo o inactivo (opcional)
      * @param pageable configuración de paginación
      * @return página de categorias filtradas
      */
     @Query("""
                 SELECT c FROM Category c
-                WHERE (:nombre IS NULL OR c.nombre ILIKE %:nombre%)
-                AND (:activo IS NULL OR c.activo = :activo)
+                WHERE (:name IS NULL OR c.name ILIKE %:name%)
+                AND (:isActive IS NULL OR c.isActive = :isActive)
             """)
     Page<Category> findByFilters(
-            @Param("nombre") String nombre,
-            @Param("activo") Boolean activo,
+            @Param("name") String name,
+            @Param("isActive") Boolean isActive,
             Pageable pageable);
 
 }

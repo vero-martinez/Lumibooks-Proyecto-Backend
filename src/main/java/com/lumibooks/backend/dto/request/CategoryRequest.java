@@ -23,6 +23,6 @@ public class CategoryRequest {
      */
     @NotBlank(message = "El nombre de la categoría es obligatorio")
     @Size(max = 150, message = "El nombre no puede superar los 150 caracteres")
-    private String nombre;
+    private String name;
     
 }
