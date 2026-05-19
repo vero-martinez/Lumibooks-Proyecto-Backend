@@ -22,8 +22,8 @@ public class AuthResponse {
     @Builder.Default
     private String tokenType = "Bearer"; // Tipo de token, generalmente "Bearer"
     private String email; // Email del usuario autenticado
-    private String nombre; // Nombre del usuario autenticado
-    private String apellido; // Apellido del usuario autenticado
-    private String rol; // Rol del usuario autenticado
-    private String mensaje; // Mensaje adicional, como "Inicio de sesión exitoso"
+    private String firstName; // Nombre del usuario autenticado
+    private String lastName; // Apellido del usuario autenticado
+    private String role; // Rol del usuario autenticado
+    private String message; // Mensaje adicional, como "Inicio de sesión exitoso"
 }

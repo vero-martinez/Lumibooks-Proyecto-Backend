@@ -20,18 +20,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "usuarios")
+@Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nombre", nullable = false, length = 150)
-    private String nombre;
+    @Column(name = "first_name", nullable = false, length = 150)
+    private String firstName;
 
-    @Column(name = "apellido", nullable = false, length = 150)
-    private String apellido;
+    @Column(name = "last_name", nullable = false, length = 150)
+    private String lastName;
 
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
@@ -43,22 +43,22 @@ public class User {
     private String dni;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "rol", nullable = false)
-    private RoleUser rol;
+    @Column(name = "role", nullable = false)
+    private RoleUser role;
 
-    @Column(name = "telefono", length = 9)
-    private String telefono;
+    @Column(name = "cellphone", length = 9)
+    private String cellphone;
     
     @Builder.Default
-    @Column(name = "activo", nullable = false)
-    private Boolean activo = true;
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
 
     @CreationTimestamp
-    @Column(name = "fecha_registro", nullable = false, updatable = false)
-    private LocalDateTime fechaRegistro;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "fecha_actualizacion", nullable = false)
-    private LocalDateTime fechaActualizacion;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
 }

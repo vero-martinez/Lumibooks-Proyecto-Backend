@@ -53,14 +53,14 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User newUser = User.builder()
-                .nombre(registerRequest.getNombre())
-                .apellido(registerRequest.getApellido())
+                .firstName(registerRequest.getFirstName())
+                .lastName(registerRequest.getLastName())
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .dni(registerRequest.getDni())
-                .telefono(registerRequest.getTelefono())
-                .rol(RoleUser.CLIENTE)
-                .activo(true)
+                .cellphone(registerRequest.getCellphone())
+                .role(RoleUser.CLIENTE)
+                .isActive(true)
                 .build();
 
         User savedUser = userRepository.save(newUser);
@@ -70,11 +70,11 @@ public class AuthServiceImpl implements AuthService {
 
         return AuthResponse.builder()
                 .token(token)
-                .nombre(savedUser.getNombre())
-                .apellido(savedUser.getApellido())
+                .firstName(savedUser.getFirstName())
+                .lastName(savedUser.getLastName())
                 .email(savedUser.getEmail())
-                .rol(savedUser.getRol().toString())
-                .mensaje("Usuario registrado exitosamente")
+                .role(savedUser.getRole().toString())
+                .message("Usuario registrado exitosamente")
                 .build();
     }
 
@@ -109,11 +109,11 @@ public class AuthServiceImpl implements AuthService {
 
         return AuthResponse.builder()
                 .token(token)
-                .nombre(user.getNombre())
-                .apellido(user.getApellido())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .email(user.getEmail())
-                .rol(user.getRol().toString())
-                .mensaje("Inicio de sesión exitoso")
+                .role(user.getRole().toString())
+                .message("Inicio de sesión exitoso")
                 .build();
     }
 }

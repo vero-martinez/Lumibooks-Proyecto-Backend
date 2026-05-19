@@ -30,12 +30,12 @@ public class RegisterRequest {
     @NotBlank(message = "El nombre es obligatorio")
     @Size(max = 150, message = "El nombre no puede superar los 150 caracteres")
     @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", message = "El nombre solo puede contener letras y espacios")
-    private String nombre;
+    private String firstName;
 
     @NotBlank(message = "El apellido es obligatorio")
     @Size(max = 150, message = "El apellido no puede superar los 150 caracteres")
     @Pattern(regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$", message = "El apellido solo puede contener letras y espacios")
-    private String apellido;
+    private String lastName;
 
     @NotBlank(message = "El email es obligatorio")
     @Email(message = "El email no tiene un formato válido")
@@ -51,11 +51,11 @@ public class RegisterRequest {
     private String dni;
 
     @Pattern(regexp = "^[0-9]{9}$", message = "El teléfono debe tener exactamente 9 dígitos")
-    private String telefono;
+    private String cellphone;
 
     @AssertTrue(message = "Debes aceptar los términos y condiciones")
-    private Boolean aceptaTerminos;
+    private Boolean acceptsTerms;
 
-    private Boolean suscribirNewsletter;
+    private Boolean subscribedToNewsletter;
     
 }
