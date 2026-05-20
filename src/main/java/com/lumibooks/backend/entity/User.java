@@ -58,7 +58,10 @@ public class User {
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Subscriber subscriber;
 
 }
