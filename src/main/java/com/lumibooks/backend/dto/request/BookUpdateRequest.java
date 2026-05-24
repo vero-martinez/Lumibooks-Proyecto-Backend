@@ -59,7 +59,5 @@ public class BookUpdateRequest {
 
     @Size(min = 1, message = "Debe tener al menos una categoría")
     private Set<Long> categoryIds;
-
-    private Boolean isActive;
     
 }
