@@ -22,7 +22,7 @@ public class BookAdminDetailResponse {
     private Long id;
     private String coverImageUrl;
     private String title;
-    private List<AuthorPublicResponse> authors;
+    private List<String> authors;
     /**
      * Indica si el libro está disponible (Stock > 0)
      */
@@ -36,7 +36,7 @@ public class BookAdminDetailResponse {
     private Short editionYear;
     private List<String> categories;
     private Integer stock;
-    private Boolean isActive;
+    private boolean isActive;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
