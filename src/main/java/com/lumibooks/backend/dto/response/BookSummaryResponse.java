@@ -23,7 +23,7 @@ public class BookSummaryResponse {
     private List<String> authors;
     private BigDecimal price;
     private Integer stock;
-    private Boolean isActive;
+    private boolean isActive;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;

@@ -24,7 +24,7 @@ public class BookDetailResponse {
     /**
      * Indica si el libro está disponible (Stock > 0)
      */
-    private Boolean available; 
+    private boolean available; 
     private String description;
     private BigDecimal price;
     private String isbn;
