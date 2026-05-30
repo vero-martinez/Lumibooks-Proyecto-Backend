@@ -18,6 +18,7 @@ import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.mapper.DepartmentMapper;
 import com.lumibooks.backend.repository.DepartmentRepository;
+import com.lumibooks.backend.repository.ProvinceRepository;
 import com.lumibooks.backend.service.DepartmentService;
 import com.lumibooks.backend.specification.DepartmentSpecification;
 
@@ -32,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final ProvinceRepository provinceRepository;
     private final DepartmentMapper departmentMapper;
 
     // ============ Público ============
@@ -99,6 +101,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (request.getName() != null && departmentRepository.existsByNameAndIdNot(request.getName(), id)) {
             throw new BadRequestException(
                     "Ya existe un departamento con el nombre: " + request.getName());
+        }
+
+        boolean seEstaDesactivando = Boolean.FALSE.equals(request.getIsActive()) && department.isActive();
+        if (seEstaDesactivando) {
+            provinceRepository.deactivateByDepartmentId(id);
         }
 
         departmentMapper.updateEntity(department, request);
