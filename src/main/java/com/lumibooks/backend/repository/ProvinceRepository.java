@@ -4,9 +4,6 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.lumibooks.backend.entity.Province;
@@ -29,10 +26,5 @@ public interface ProvinceRepository extends JpaRepository<Province, Long>, JpaSp
     // Provincias activas de un departamento ordenadas alfabéticamente (endpoint
     // público)
     List<Province> findByDepartmentIdAndIsActiveTrueOrderByNameAsc(Long departmentId);
-
-    // Desactivar todas las provincias de un departamento
-    @Modifying
-    @Query("UPDATE Province p SET p.isActive = false WHERE p.department.id = :departmentId")
-    void deactivateByDepartmentId(@Param("departmentId") Long departmentId);
 
 }
