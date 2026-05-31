@@ -24,4 +24,9 @@ public class ProvinceSpecification {
                 cb.equal(root.get("department").get("id"), departmentId);
     }
 
+    public static Specification<Province> hasDepartmentActive() {
+    return (root, query, cb) ->
+            cb.equal(root.get("department").get("isActive"), true);
+}
+
 }
