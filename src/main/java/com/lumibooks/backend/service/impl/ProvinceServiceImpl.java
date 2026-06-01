@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,26 +42,25 @@ public class ProvinceServiceImpl implements ProvinceService {
 
     @Override
     public List<ProvincePublicResponse> getProvincesPublic(Long departmentId, String search) {
+        Specification<Province> spec = Specification.unrestricted();
+        spec = spec.and(ProvinceSpecification.hasActive(true));
+        spec = spec.and(ProvinceSpecification.hasDepartment(departmentId));
+        spec = spec.and(ProvinceSpecification.hasDepartmentActive());
+
         if (search != null && !search.isBlank()) {
-            Specification<Province> spec = Specification.unrestricted();
             spec = spec.and(ProvinceSpecification.nameContains(search));
-            spec = spec.and(ProvinceSpecification.hasActive(true));
-            spec = spec.and(ProvinceSpecification.hasDepartment(departmentId));
-            return provinceRepository.findAll(spec)
-                    .stream()
-                    .map(provinceMapper::toPublicResponse)
-                    .toList();
         }
-        return provinceRepository.findByDepartmentIdAndIsActiveTrueOrderByNameAsc(departmentId)
+
+        return provinceRepository.findAll(spec, Sort.by("name").ascending())
                 .stream()
                 .map(provinceMapper::toPublicResponse)
                 .toList();
     }
-
     // ============ Admin ============
 
     @Override
-    public Page<ProvinceSummaryResponse> getProvincesAdmin(String search, Boolean isActive, Long departmentId, Pageable pageable) {
+    public Page<ProvinceSummaryResponse> getProvincesAdmin(String search, Boolean isActive, Long departmentId,
+            Pageable pageable) {
         Specification<Province> spec = Specification.unrestricted();
 
         if (search != null && !search.isBlank()) {
