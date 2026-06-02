@@ -64,4 +64,8 @@ public class User {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Subscriber subscriber;
 
+    public String getFullName(){
+        return firstName + " " + lastName;
+    }
+
 }
