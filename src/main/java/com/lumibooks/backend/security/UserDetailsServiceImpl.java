@@ -35,7 +35,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .username(user.getEmail())
                 .password(user.getPassword())
                 .authorities("ROLE_" + user.getRole().name()) // Aquí se podrían agregar roles o permisos si se implementan
-                .accountLocked(!user.getIsActive()) // Si el campo "isActive" es false, la cuenta se considera bloqueada
+                .accountLocked(!user.isActive()) // Si el campo "isActive" es false, la cuenta se considera bloqueada
                 .build();
     }
 }
