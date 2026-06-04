@@ -23,8 +23,7 @@ public interface ProvinceRepository extends JpaRepository<Province, Long>, JpaSp
     // la propia provincia)
     boolean existsByNameAndDepartmentIdAndIdNot(String name, Long departmentId, Long id);
 
-    // Provincias activas de un departamento ordenadas alfabéticamente (endpoint
-    // público)
-    List<Province> findByDepartmentIdAndIsActiveTrueOrderByNameAsc(Long departmentId);
+    // Provincias de un departamento ordenadas alfabéticamente
+    List<Province> findByDepartmentIdOrderByNameAsc(Long departmentId);
 
 }
