@@ -33,7 +33,6 @@ public class ProvinceMapper {
         return ProvinceSummaryResponse.builder()
                 .id(province.getId())
                 .name(province.getName())
-                .isActive(province.isActive())
                 .departmentName(province.getDepartment().getName())
                 .createdAt(province.getCreatedAt())
                 .build();
@@ -43,7 +42,6 @@ public class ProvinceMapper {
         return ProvinceAdminDetailResponse.builder()
                 .id(province.getId())
                 .name(province.getName())
-                .isActive(province.isActive())
                 .departmentId(province.getDepartment().getId())
                 .departmentName(province.getDepartment().getName())
                 .createdAt(province.getCreatedAt())
@@ -56,14 +54,12 @@ public class ProvinceMapper {
         return Province.builder()
                 .name(request.getName())
                 .department(department)
-                .isActive(Boolean.TRUE.equals(request.getIsActive()))
                 .build();
     }
 
     public void updateEntity(Province province, ProvinceUpdateRequest request, Department department) {
         Optional.ofNullable(request.getName()).ifPresent(province::setName);
         Optional.ofNullable(department).ifPresent(province::setDepartment);
-        Optional.ofNullable(request.getIsActive()).ifPresent(province::setActive);
     }
 
 }

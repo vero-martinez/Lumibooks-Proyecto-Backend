@@ -34,7 +34,6 @@ public class DistrictMapper {
         return DistrictSummaryResponse.builder()
                 .id(district.getId())
                 .name(district.getName())
-                .isActive(district.isActive())
                 .provinceName(district.getProvince().getName())
                 .departmentName(district.getProvince().getDepartment().getName())
                 .shippingCost(district.getShippingCost())
@@ -46,7 +45,6 @@ public class DistrictMapper {
         return DistrictAdminDetailResponse.builder()
                 .id(district.getId())
                 .name(district.getName())
-                .isActive(district.isActive())
                 .provinceId(district.getProvince().getId())
                 .provinceName(district.getProvince().getName())
                 .departmentId(district.getProvince().getDepartment().getId())
@@ -63,7 +61,6 @@ public class DistrictMapper {
                 .name(request.getName())
                 .province(province)
                 .shippingCost(request.getShippingCost())
-                .isActive(Boolean.TRUE.equals(request.getIsActive()))
                 .build();
     }
 
@@ -71,7 +68,6 @@ public class DistrictMapper {
         Optional.ofNullable(request.getName()).ifPresent(district::setName);
         Optional.ofNullable(province).ifPresent(district::setProvince);
         Optional.ofNullable(request.getShippingCost()).ifPresent(district::setShippingCost);
-        Optional.ofNullable(request.getIsActive()).ifPresent(district::setActive);
     }
 
 }

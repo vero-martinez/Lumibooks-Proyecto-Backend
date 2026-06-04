@@ -32,7 +32,6 @@ public class DepartmentMapper {
         return DepartmentSummaryResponse.builder()
                 .id(department.getId())
                 .name(department.getName())
-                .isActive(department.isActive())
                 .createdAt(department.getCreatedAt())
                 .build();
     }
@@ -41,7 +40,6 @@ public class DepartmentMapper {
         return DepartmentAdminDetailResponse.builder()
                 .id(department.getId())
                 .name(department.getName())
-                .isActive(department.isActive())
                 .createdAt(department.getCreatedAt())
                 .updatedAt(department.getUpdatedAt())
                 .build();
@@ -51,13 +49,11 @@ public class DepartmentMapper {
     public Department toEntity(DepartmentCreateRequest request) {
         return Department.builder()
                 .name(request.getName())
-                .isActive(request.isActive())
                 .build();
     }
 
     public void updateEntity(Department department, DepartmentUpdateRequest request) {
         Optional.ofNullable(request.getName()).ifPresent(department::setName);
-        Optional.ofNullable(request.getIsActive()).ifPresent(department::setActive);
     }
 
 }
