@@ -44,6 +44,10 @@ public class District {
     @Column(name = "shipping_cost", precision = 10, scale = 2)
     private BigDecimal shippingCost;
 
+    @Builder.Default
+    @Column(name = "is_shipping_available", nullable = false)
+    private boolean isShippingAvailable = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
