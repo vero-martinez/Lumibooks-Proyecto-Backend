@@ -36,9 +36,8 @@ public class DepartmentAdminController {
     @GetMapping
     public ResponseEntity<Page<DepartmentSummaryResponse>> getDepartments(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Boolean isActive,
             Pageable pageable) {
-        return ResponseEntity.ok(departmentService.getDepartmentsAdmin(search, isActive, pageable));
+        return ResponseEntity.ok(departmentService.getDepartmentsAdmin(search, pageable));
     }
 
     // Endpoint para obtener el detalle completo de un departamento para el panel de administración

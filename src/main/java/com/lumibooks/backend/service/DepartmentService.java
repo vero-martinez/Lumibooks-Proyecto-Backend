@@ -17,20 +17,19 @@ import com.lumibooks.backend.dto.department.response.DepartmentSummaryResponse;
 public interface DepartmentService {
 
     /**
-     * Retorna los departamentos activos ordenados alfabéticamente para selectores públicos.
+     * Retorna los departamentos ordenados alfabéticamente para selectores públicos.
      * @param search búsqueda opcional por nombre
-     * @return lista de departamentos activos
+     * @return lista de departamentos 
      */
     List<DepartmentPublicResponse> getDepartmentsPublic(String search);
 
     /**
      * Retorna departamentos con filtros dinámicos para la tabla de administración.
      * @param search   búsqueda por nombre
-     * @param isActive filtro por estado activo/inactivo
      * @param pageable paginación y ordenamiento
      * @return página de departamentos en formato resumen
      */
-    Page<DepartmentSummaryResponse> getDepartmentsAdmin(String search, Boolean isActive, Pageable pageable);
+    Page<DepartmentSummaryResponse> getDepartmentsAdmin(String search, Pageable pageable);
 
     /**
      * Retorna el detalle completo de un departamento para el panel de administración.
@@ -57,6 +56,5 @@ public interface DepartmentService {
      * @throws BadRequestException si ya existe un departamento con el mismo nombre
      */
     DepartmentAdminDetailResponse updateDepartment(Long id, DepartmentUpdateRequest request);
-
 
 }

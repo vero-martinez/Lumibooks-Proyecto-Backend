@@ -43,9 +43,7 @@ public class ProvinceServiceImpl implements ProvinceService {
     @Override
     public List<ProvincePublicResponse> getProvincesPublic(Long departmentId, String search) {
         Specification<Province> spec = Specification.unrestricted();
-        spec = spec.and(ProvinceSpecification.hasActive(true));
         spec = spec.and(ProvinceSpecification.hasDepartment(departmentId));
-        spec = spec.and(ProvinceSpecification.hasDepartmentActive());
 
         if (search != null && !search.isBlank()) {
             spec = spec.and(ProvinceSpecification.nameContains(search));
@@ -59,16 +57,14 @@ public class ProvinceServiceImpl implements ProvinceService {
     // ============ Admin ============
 
     @Override
-    public Page<ProvinceSummaryResponse> getProvincesAdmin(String search, Boolean isActive, Long departmentId,
+    public Page<ProvinceSummaryResponse> getProvincesAdmin(String search, Long departmentId,
             Pageable pageable) {
         Specification<Province> spec = Specification.unrestricted();
 
         if (search != null && !search.isBlank()) {
             spec = spec.and(ProvinceSpecification.nameContains(search));
         }
-        if (isActive != null) {
-            spec = spec.and(ProvinceSpecification.hasActive(isActive));
-        }
+        
         if (departmentId != null) {
             spec = spec.and(ProvinceSpecification.hasDepartment(departmentId));
         }
@@ -91,11 +87,6 @@ public class ProvinceServiceImpl implements ProvinceService {
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Departamento no encontrado con id: " + request.getDepartmentId()));
-
-        if (Boolean.TRUE.equals(request.getIsActive()) && !department.isActive()) {
-            throw new BadRequestException(
-                    "No se puede crear una provincia activa en un departamento inactivo");
-        }
 
         if (provinceRepository.existsByNameAndDepartmentId(request.getName(), request.getDepartmentId())) {
             throw new BadRequestException(
@@ -121,11 +112,6 @@ public class ProvinceServiceImpl implements ProvinceService {
         }
 
         Department deptoActual = department != null ? department : province.getDepartment();
-
-        if (Boolean.TRUE.equals(request.getIsActive()) && !deptoActual.isActive()) {
-            throw new BadRequestException(
-                    "No se puede activar una provincia si su departamento está inactivo");
-        }
 
         Long departmentIdAValidar = deptoActual.getId();
         String nameAValidar = request.getName() != null ? request.getName() : province.getName();

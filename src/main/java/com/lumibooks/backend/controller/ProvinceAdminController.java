@@ -36,10 +36,9 @@ public class ProvinceAdminController {
     @GetMapping
     public ResponseEntity<Page<ProvinceSummaryResponse>> getProvinces(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Boolean isActive,
             @RequestParam(required = false) Long departmentId,
             Pageable pageable) {
-        return ResponseEntity.ok(provinceService.getProvincesAdmin(search, isActive, departmentId, pageable));
+        return ResponseEntity.ok(provinceService.getProvincesAdmin(search, departmentId, pageable));
     }
 
     // Endpoint para obtener el detalle completo de una provincia por su ID

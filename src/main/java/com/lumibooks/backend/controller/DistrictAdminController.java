@@ -36,11 +36,10 @@ public class DistrictAdminController {
     @GetMapping
     public ResponseEntity<Page<DistrictSummaryResponse>> getDistricts(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Boolean isActive,
             @RequestParam(required = false) Long provinceId,
             @RequestParam(required = false) Long departmentId,
             Pageable pageable) {
-        return ResponseEntity.ok(districtService.getDistrictsAdmin(search, isActive, provinceId, departmentId, pageable));
+        return ResponseEntity.ok(districtService.getDistrictsAdmin(search, provinceId, departmentId, pageable));
     }
 
     // Endpoint para obtener los detalles de un distrito en la parte administrativa

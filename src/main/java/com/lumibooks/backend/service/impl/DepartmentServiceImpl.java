@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,16 +39,13 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public List<DepartmentPublicResponse> getDepartmentsPublic(String search) {
+        Specification<Department> spec = Specification.unrestricted();
+
         if (search != null && !search.isBlank()) {
-            Specification<Department> spec = Specification.unrestricted();
             spec = spec.and(DepartmentSpecification.nameContains(search));
-            spec = spec.and(DepartmentSpecification.hasActive(true));
-            return departmentRepository.findAll(spec)
-                    .stream()
-                    .map(departmentMapper::toPublicResponse)
-                    .toList();
         }
-        return departmentRepository.findByIsActiveTrueOrderByNameAsc()
+
+        return departmentRepository.findAll(spec, Sort.by("name").ascending())
                 .stream()
                 .map(departmentMapper::toPublicResponse)
                 .toList();
@@ -56,14 +54,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     // ============ Admin ============
 
     @Override
-    public Page<DepartmentSummaryResponse> getDepartmentsAdmin(String search, Boolean isActive, Pageable pageable) {
+    public Page<DepartmentSummaryResponse> getDepartmentsAdmin(String search, Pageable pageable) {
         Specification<Department> spec = Specification.unrestricted();
 
         if (search != null && !search.isBlank()) {
             spec = spec.and(DepartmentSpecification.nameContains(search));
-        }
-        if (isActive != null) {
-            spec = spec.and(DepartmentSpecification.hasActive(isActive));
         }
 
         return departmentRepository.findAll(spec, pageable)

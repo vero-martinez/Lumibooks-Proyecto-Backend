@@ -42,10 +42,7 @@ public class DistrictServiceImpl implements DistrictService {
     @Override
     public List<DistrictPublicResponse> getDistrictsPublic(Long provinceId, String search) {
         Specification<District> spec = Specification.unrestricted();
-        spec = spec.and(DistrictSpecification.hasActive(true));
         spec = spec.and(DistrictSpecification.hasProvince(provinceId));
-        spec = spec.and(DistrictSpecification.hasProvinceActive());
-        spec = spec.and(DistrictSpecification.hasDepartmentActive());
 
         if (search != null && !search.isBlank()) {
             spec = spec.and(DistrictSpecification.nameContains(search));
@@ -59,16 +56,14 @@ public class DistrictServiceImpl implements DistrictService {
     // ============ Admin ============
 
     @Override
-    public Page<DistrictSummaryResponse> getDistrictsAdmin(String search, Boolean isActive, Long provinceId,
+    public Page<DistrictSummaryResponse> getDistrictsAdmin(String search, Long provinceId,
             Long departmentId, Pageable pageable) {
         Specification<District> spec = Specification.unrestricted();
 
         if (search != null && !search.isBlank()) {
             spec = spec.and(DistrictSpecification.nameContains(search));
         }
-        if (isActive != null) {
-            spec = spec.and(DistrictSpecification.hasActive(isActive));
-        }
+        
         if (provinceId != null) {
             spec = spec.and(DistrictSpecification.hasProvince(provinceId));
         }
@@ -95,11 +90,6 @@ public class DistrictServiceImpl implements DistrictService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Provincia no encontrada con id: " + request.getProvinceId()));
 
-        if (Boolean.TRUE.equals(request.getIsActive()) && !province.isActive()) {
-            throw new BadRequestException(
-                    "No se puede crear un distrito activo en una provincia inactiva");
-        }
-
         if (districtRepository.existsByNameAndProvinceId(request.getName(), request.getProvinceId())) {
             throw new BadRequestException(
                     "Ya existe un distrito con el nombre: " + request.getName() + " en esta provincia");
@@ -125,10 +115,6 @@ public class DistrictServiceImpl implements DistrictService {
 
         Province provinciaActual = province != null ? province : district.getProvince();
 
-        if (Boolean.TRUE.equals(request.getIsActive()) && !provinciaActual.isActive()) {
-            throw new BadRequestException(
-                    "No se puede activar un distrito si su provincia está inactiva");
-        }
 
         Long provinceIdAValidar = provinciaActual.getId();
         String nameAValidar = request.getName() != null ? request.getName() : district.getName();
