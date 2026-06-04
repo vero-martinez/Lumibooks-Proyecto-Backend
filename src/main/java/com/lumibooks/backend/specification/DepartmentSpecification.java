@@ -15,9 +15,4 @@ public class DepartmentSpecification {
                 cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%");
     }
 
-    public static Specification<Department> hasActive(boolean isActive) {
-        return (root, query, cb) ->
-                cb.equal(root.get("isActive"), isActive);
-    }
-
 }

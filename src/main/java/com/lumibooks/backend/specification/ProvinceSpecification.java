@@ -14,19 +14,9 @@ public class ProvinceSpecification {
                 cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%");
     }
 
-    public static Specification<Province> hasActive(boolean isActive) {
-        return (root, query, cb) ->
-                cb.equal(root.get("isActive"), isActive);
-    }
-
     public static Specification<Province> hasDepartment(Long departmentId) {
         return (root, query, cb) ->
                 cb.equal(root.get("department").get("id"), departmentId);
     }
-
-    public static Specification<Province> hasDepartmentActive() {
-    return (root, query, cb) ->
-            cb.equal(root.get("department").get("isActive"), true);
-}
 
 }
