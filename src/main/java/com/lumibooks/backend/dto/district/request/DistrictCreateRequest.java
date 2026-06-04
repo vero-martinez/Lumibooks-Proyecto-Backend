@@ -34,6 +34,4 @@ public class DistrictCreateRequest {
     @Digits(integer = 8, fraction = 2, message = "El costo de envío debe tener máximo 2 decimales")
     private BigDecimal shippingCost;
 
-    private Boolean isActive = true;
-
 }

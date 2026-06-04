@@ -17,7 +17,6 @@ public class ProvinceAdminDetailResponse {
 
     private Long id;
     private String name;
-    private boolean isActive;
     private Long departmentId;
     private String departmentName;
 

@@ -18,7 +18,6 @@ public class DistrictSummaryResponse {
 
     private Long id;
     private String name;
-    private boolean isActive;
     private String provinceName;
     private String departmentName;
     private BigDecimal shippingCost;

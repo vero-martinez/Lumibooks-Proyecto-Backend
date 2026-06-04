@@ -20,6 +20,4 @@ public class ProvinceUpdateRequest {
 
     private Long departmentId;
 
-    private Boolean isActive;
-
 }

@@ -17,7 +17,6 @@ public class DepartmentSummaryResponse {
 
     private Long id;
     private String name;
-    private boolean isActive;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;

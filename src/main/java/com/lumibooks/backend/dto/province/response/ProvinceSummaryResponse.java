@@ -17,7 +17,6 @@ public class ProvinceSummaryResponse {
 
     private Long id;
     private String name;
-    private boolean isActive;
     private String departmentName;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
