@@ -17,17 +17,30 @@ import com.lumibooks.backend.entity.Address;
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long> {
 
-    // Obtener todas las direcciones de un usuario
-    List<Address> findByUserId(Long userId);
+    // Obtener todas las direcciones de un usuario con sus relaciones
+    @Query("""
+            SELECT a FROM Address a
+            JOIN FETCH a.district d
+            JOIN FETCH d.province p
+            JOIN FETCH p.department
+            WHERE a.user.id = :userId
+            """)
+    List<Address> findByUserId(@Param("userId") Long userId);
 
-    // Obtener una dirección específica de un usuario
-    Optional<Address> findByIdAndUserId(Long id, Long userId);
+    // Obtener una dirección específica de un usuario con sus relaciones
+    @Query("""
+            SELECT a FROM Address a
+            JOIN FETCH a.district d
+            JOIN FETCH d.province p
+            JOIN FETCH p.department
+            WHERE a.id = :id AND a.user.id = :userId
+            """)
+    Optional<Address> findByIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);
 
     // Contar el número de direcciones de un usuario (para validar límite de 5 direcciones)
     long countByUserId(Long userId);
 
-    // Marcar todas las direcciones de un usuario como no predeterminadas 
-    // (para establecer una nueva dirección predeterminada)
+    // Marcar todas las direcciones de un usuario como no predeterminadas
     @Modifying
     @Query("UPDATE Address a SET a.isDefault = false WHERE a.user.id = :userId")
     void clearDefaultByUserId(@Param("userId") Long userId);
