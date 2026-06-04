@@ -1,6 +1,8 @@
 package com.lumibooks.backend.repository;
 
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -20,5 +22,8 @@ public interface DistrictRepository extends JpaRepository<District, Long>, JpaSp
     // Verificar nombre único dentro de la misma provincia (al actualizar, excluye
     // el propio distrito)
     boolean existsByNameAndProvinceIdAndIdNot(String name, Long provinceId, Long id);
+
+    // Obtener un distrito activo por su ID (para validar que el distrito existe y está activo)
+    Optional<District> findByIdAndIsActiveTrue(Long id);
 
 }
