@@ -22,7 +22,8 @@ import com.lumibooks.backend.service.AddressService;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Implementación del servicio de gestión de direcciones del usuario autenticado.
+ * Implementación del servicio de gestión de direcciones del usuario
+ * autenticado.
  */
 @Service
 @RequiredArgsConstructor
@@ -53,7 +54,7 @@ public class AddressServiceImpl implements AddressService {
             throw new BadRequestException("No puedes tener más de 5 direcciones");
         }
 
-        District district = resolveDistrict(request.getDistrictId());
+        District district = findDistrictOrThrow(request.getDistrictId());
         Address address = addressMapper.toEntity(request, user, district);
 
         if (total == 0) {
@@ -67,10 +68,10 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public AddressResponse updateAddress(Long addressId, AddressUpdateRequest request) {
         User user = authenticatedUserProvider.getAuthenticatedUser();
-        Address address = resolveAddress(addressId, user.getId());
+        Address address = findAddressOrThrow(addressId, user.getId());
 
         District district = request.getDistrictId() != null
-                ? resolveDistrict(request.getDistrictId())
+                ? findDistrictOrThrow(request.getDistrictId())
                 : null;
 
         addressMapper.updateEntity(request, address, district);
@@ -81,7 +82,7 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public void deleteAddress(Long addressId) {
         User user = authenticatedUserProvider.getAuthenticatedUser();
-        Address address = resolveAddress(addressId, user.getId());
+        Address address = findAddressOrThrow(addressId, user.getId());
         boolean wasDefault = address.isDefault();
 
         addressRepository.delete(address);
@@ -101,7 +102,7 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public void setDefaultAddress(Long addressId) {
         User user = authenticatedUserProvider.getAuthenticatedUser();
-        Address address = resolveAddress(addressId, user.getId());
+        Address address = findAddressOrThrow(addressId, user.getId());
 
         if (address.isDefault()) {
             throw new BadRequestException("Esta dirección ya es la predeterminada");
@@ -114,14 +115,14 @@ public class AddressServiceImpl implements AddressService {
 
     // ============ Helpers privados ============
 
-    private Address resolveAddress(Long addressId, Long userId) {
+    private Address findAddressOrThrow(Long addressId, Long userId) {
         return addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Dirección no encontrada con id: " + addressId));
     }
 
-    private District resolveDistrict(Long districtId) {
-        return districtRepository.findByIdAndIsActiveTrue(districtId)
+    private District findDistrictOrThrow(Long districtId) {
+        return districtRepository.findById(districtId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Distrito no encontrado con id: " + districtId));
     }
