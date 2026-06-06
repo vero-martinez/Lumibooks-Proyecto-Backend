@@ -40,10 +40,6 @@ public class Province {
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
-    @Builder.Default
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive = true;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

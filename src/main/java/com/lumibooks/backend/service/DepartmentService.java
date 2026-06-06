@@ -5,8 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.lumibooks.backend.dto.department.request.DepartmentCreateRequest;
-import com.lumibooks.backend.dto.department.request.DepartmentUpdateRequest;
+import com.lumibooks.backend.dto.department.request.DepartmentRequest;
 import com.lumibooks.backend.dto.department.response.DepartmentAdminDetailResponse;
 import com.lumibooks.backend.dto.department.response.DepartmentPublicResponse;
 import com.lumibooks.backend.dto.department.response.DepartmentSummaryResponse;
@@ -17,20 +16,19 @@ import com.lumibooks.backend.dto.department.response.DepartmentSummaryResponse;
 public interface DepartmentService {
 
     /**
-     * Retorna los departamentos activos ordenados alfabéticamente para selectores públicos.
+     * Retorna los departamentos ordenados alfabéticamente para selectores públicos.
      * @param search búsqueda opcional por nombre
-     * @return lista de departamentos activos
+     * @return lista de departamentos 
      */
     List<DepartmentPublicResponse> getDepartmentsPublic(String search);
 
     /**
      * Retorna departamentos con filtros dinámicos para la tabla de administración.
      * @param search   búsqueda por nombre
-     * @param isActive filtro por estado activo/inactivo
      * @param pageable paginación y ordenamiento
      * @return página de departamentos en formato resumen
      */
-    Page<DepartmentSummaryResponse> getDepartmentsAdmin(String search, Boolean isActive, Pageable pageable);
+    Page<DepartmentSummaryResponse> getDepartmentsAdmin(String search, Pageable pageable);
 
     /**
      * Retorna el detalle completo de un departamento para el panel de administración.
@@ -46,7 +44,7 @@ public interface DepartmentService {
      * @return detalle del departamento creado
      * @throws BadRequestException si ya existe un departamento con el mismo nombre
      */
-    DepartmentAdminDetailResponse createDepartment(DepartmentCreateRequest request);
+    DepartmentSummaryResponse createDepartment(DepartmentRequest request);
 
     /**
      * Actualiza un departamento existente.
@@ -56,7 +54,6 @@ public interface DepartmentService {
      * @throws ResourceNotFoundException si el departamento no existe
      * @throws BadRequestException si ya existe un departamento con el mismo nombre
      */
-    DepartmentAdminDetailResponse updateDepartment(Long id, DepartmentUpdateRequest request);
-
+    DepartmentSummaryResponse updateDepartment(Long id, DepartmentRequest request);
 
 }

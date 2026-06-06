@@ -18,12 +18,10 @@ public class DistrictAdminDetailResponse {
 
     private Long id;
     private String name;
-    private boolean isActive;
-    private Long provinceId;
     private String provinceName;
-    private Long departmentId;
     private String departmentName;
     private BigDecimal shippingCost;
+    private Boolean isShippingAvailable;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;

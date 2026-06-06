@@ -1,15 +1,16 @@
 package com.lumibooks.backend.mapper;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.lumibooks.backend.dto.department.request.DepartmentCreateRequest;
-import com.lumibooks.backend.dto.department.request.DepartmentUpdateRequest;
+import com.lumibooks.backend.dto.department.request.DepartmentRequest;
+import com.lumibooks.backend.dto.department.response.DepartmentSummaryResponse;
+import com.lumibooks.backend.dto.province.response.ProvincePublicResponse;
 import com.lumibooks.backend.dto.department.response.DepartmentAdminDetailResponse;
 import com.lumibooks.backend.dto.department.response.DepartmentPublicResponse;
-import com.lumibooks.backend.dto.department.response.DepartmentSummaryResponse;
 import com.lumibooks.backend.entity.Department;
+import com.lumibooks.backend.entity.Province;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,32 +33,38 @@ public class DepartmentMapper {
         return DepartmentSummaryResponse.builder()
                 .id(department.getId())
                 .name(department.getName())
-                .isActive(department.isActive())
                 .createdAt(department.getCreatedAt())
+                .updatedAt(department.getUpdatedAt())
                 .build();
     }
 
-    public DepartmentAdminDetailResponse toAdminDetailResponse(Department department) {
+    public DepartmentAdminDetailResponse toAdminDetailResponse(
+            Department department,
+            List<Province> provinces) {
         return DepartmentAdminDetailResponse.builder()
                 .id(department.getId())
                 .name(department.getName())
-                .isActive(department.isActive())
+                .provinceCount(provinces.size())
+                .provinces(provinces.stream()
+                        .map(p -> ProvincePublicResponse.builder()
+                                .id(p.getId())
+                                .name(p.getName())
+                                .build())
+                        .toList())
                 .createdAt(department.getCreatedAt())
                 .updatedAt(department.getUpdatedAt())
                 .build();
     }
 
     // ============ Request DTO --> Entity =============
-    public Department toEntity(DepartmentCreateRequest request) {
+    public Department toEntity(DepartmentRequest request) {
         return Department.builder()
                 .name(request.getName())
-                .isActive(request.isActive())
                 .build();
     }
 
-    public void updateEntity(Department department, DepartmentUpdateRequest request) {
-        Optional.ofNullable(request.getName()).ifPresent(department::setName);
-        Optional.ofNullable(request.getIsActive()).ifPresent(department::setActive);
+    public void updateEntity(Department department, DepartmentRequest request) {
+        department.setName(request.getName());
     }
 
 }

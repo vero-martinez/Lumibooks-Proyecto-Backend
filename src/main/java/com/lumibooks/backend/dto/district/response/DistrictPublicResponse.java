@@ -1,7 +1,5 @@
 package com.lumibooks.backend.dto.district.response;
 
-import java.math.BigDecimal;
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,6 +13,5 @@ public class DistrictPublicResponse {
 
     private Long id;
     private String name;
-    private BigDecimal shippingCost;
 
 }

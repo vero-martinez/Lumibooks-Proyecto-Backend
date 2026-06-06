@@ -32,14 +32,14 @@ public class ProvinceAdminController {
 
     private final ProvinceService provinceService;
 
-    // Endpoint para obtener la lista de provincias con filtros dinámicos y paginación
+    // Endpoint para obtener la lista de provincias con filtros dinámicos y
+    // paginación
     @GetMapping
     public ResponseEntity<Page<ProvinceSummaryResponse>> getProvinces(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Boolean isActive,
             @RequestParam(required = false) Long departmentId,
             Pageable pageable) {
-        return ResponseEntity.ok(provinceService.getProvincesAdmin(search, isActive, departmentId, pageable));
+        return ResponseEntity.ok(provinceService.getProvincesAdmin(search, departmentId, pageable));
     }
 
     // Endpoint para obtener el detalle completo de una provincia por su ID
@@ -50,7 +50,7 @@ public class ProvinceAdminController {
 
     // Endpoint para crear una nueva provincia
     @PostMapping
-    public ResponseEntity<ProvinceAdminDetailResponse> createProvince(
+    public ResponseEntity<ProvinceSummaryResponse> createProvince(
             @RequestBody @Valid ProvinceCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(provinceService.createProvince(request));
@@ -58,7 +58,7 @@ public class ProvinceAdminController {
 
     // Endpoint para actualizar una provincia existente
     @PatchMapping("/{id}")
-    public ResponseEntity<ProvinceAdminDetailResponse> updateProvince(
+    public ResponseEntity<ProvinceSummaryResponse> updateProvince(
             @PathVariable Long id,
             @RequestBody @Valid ProvinceUpdateRequest request) {
         return ResponseEntity.ok(provinceService.updateProvince(id, request));

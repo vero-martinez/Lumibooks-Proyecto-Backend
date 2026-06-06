@@ -15,11 +15,6 @@ public class DistrictSpecification {
         return (root, query, cb) -> cb.like(cb.lower(root.get("name")), "%" + search.toLowerCase() + "%");
     }
 
-    // Filtrar por estado de actividad
-    public static Specification<District> hasActive(boolean isActive) {
-        return (root, query, cb) -> cb.equal(root.get("isActive"), isActive);
-    }
-
     // Filtrar por provincia
     public static Specification<District> hasProvince(Long provinceId) {
         return (root, query, cb) -> cb.equal(root.get("province").get("id"), provinceId);
@@ -30,14 +25,9 @@ public class DistrictSpecification {
         return (root, query, cb) -> cb.equal(root.get("province").get("department").get("id"), departmentId);
     }
 
-    // Filtrar solo distritos con provincia activa
-    public static Specification<District> hasProvinceActive() {
-        return (root, query, cb) -> cb.equal(root.get("province").get("isActive"), true);
-    }
-
-    // Filtrar solo distritos con departamento activo
-    public static Specification<District> hasDepartmentActive() {
-        return (root, query, cb) -> cb.equal(root.get("province").get("department").get("isActive"), true);
+    // Filtrar por disponibilidad de envío
+    public static Specification<District> hasShippingAvailable(boolean isShippingAvailable) {
+        return (root, query, cb) -> cb.equal(root.get("isShippingAvailable"), isShippingAvailable);
     }
 
 }

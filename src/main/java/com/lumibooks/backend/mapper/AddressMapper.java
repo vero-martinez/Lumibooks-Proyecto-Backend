@@ -39,7 +39,6 @@ public class AddressMapper {
                 .district(DistrictPublicResponse.builder()
                         .id(district.getId())
                         .name(district.getName())
-                        .shippingCost(district.getShippingCost())
                         .build())
                 .addressLine(address.getAddressLine())
                 .reference(address.getReference())

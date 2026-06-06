@@ -45,8 +45,8 @@ public class District {
     private BigDecimal shippingCost;
 
     @Builder.Default
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive = true;
+    @Column(name = "is_shipping_available", nullable = false)
+    private boolean isShippingAvailable = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

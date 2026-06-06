@@ -1,15 +1,18 @@
 package com.lumibooks.backend.mapper;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.lumibooks.backend.dto.department.response.DepartmentPublicResponse;
+import com.lumibooks.backend.dto.district.response.DistrictPublicResponse;
 import com.lumibooks.backend.dto.province.request.ProvinceCreateRequest;
 import com.lumibooks.backend.dto.province.request.ProvinceUpdateRequest;
 import com.lumibooks.backend.dto.province.response.ProvinceAdminDetailResponse;
 import com.lumibooks.backend.dto.province.response.ProvincePublicResponse;
 import com.lumibooks.backend.dto.province.response.ProvinceSummaryResponse;
 import com.lumibooks.backend.entity.Department;
+import com.lumibooks.backend.entity.District;
 import com.lumibooks.backend.entity.Province;
 
 import lombok.RequiredArgsConstructor;
@@ -33,19 +36,29 @@ public class ProvinceMapper {
         return ProvinceSummaryResponse.builder()
                 .id(province.getId())
                 .name(province.getName())
-                .isActive(province.isActive())
-                .departmentName(province.getDepartment().getName())
+                .department(DepartmentPublicResponse.builder()
+                        .id(province.getDepartment().getId())
+                        .name(province.getDepartment().getName())
+                        .build())
                 .createdAt(province.getCreatedAt())
+                .updatedAt(province.getUpdatedAt())
                 .build();
     }
 
-    public ProvinceAdminDetailResponse toAdminDetailResponse(Province province) {
+    public ProvinceAdminDetailResponse toAdminDetailResponse(
+            Province province,
+            List<District> districts) {
         return ProvinceAdminDetailResponse.builder()
                 .id(province.getId())
                 .name(province.getName())
-                .isActive(province.isActive())
-                .departmentId(province.getDepartment().getId())
                 .departmentName(province.getDepartment().getName())
+                .districtCount(districts.size())
+                .districts(districts.stream()
+                        .map(d -> DistrictPublicResponse.builder()
+                                .id(d.getId())
+                                .name(d.getName())
+                                .build())
+                        .toList())
                 .createdAt(province.getCreatedAt())
                 .updatedAt(province.getUpdatedAt())
                 .build();
@@ -56,14 +69,11 @@ public class ProvinceMapper {
         return Province.builder()
                 .name(request.getName())
                 .department(department)
-                .isActive(Boolean.TRUE.equals(request.getIsActive()))
                 .build();
     }
 
-    public void updateEntity(Province province, ProvinceUpdateRequest request, Department department) {
-        Optional.ofNullable(request.getName()).ifPresent(province::setName);
-        Optional.ofNullable(department).ifPresent(province::setDepartment);
-        Optional.ofNullable(request.getIsActive()).ifPresent(province::setActive);
+    public void updateEntity(Province province, ProvinceUpdateRequest request) {
+        province.setName(request.getName());
     }
 
 }

@@ -24,6 +24,4 @@ public class ProvinceCreateRequest {
     @NotNull(message = "El departamento es obligatorio")
     private Long departmentId;
 
-    private Boolean isActive = true;
-
 }
