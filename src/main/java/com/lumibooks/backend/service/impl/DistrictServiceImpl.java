@@ -1,5 +1,6 @@
 package com.lumibooks.backend.service.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -57,18 +58,24 @@ public class DistrictServiceImpl implements DistrictService {
 
     @Override
     public Page<DistrictSummaryResponse> getDistrictsAdmin(String search, Long provinceId,
-            Long departmentId, Pageable pageable) {
+            Long departmentId, Boolean isShippingAvailable, Pageable pageable) {
+
         Specification<District> spec = Specification.unrestricted();
 
         if (search != null && !search.isBlank()) {
             spec = spec.and(DistrictSpecification.nameContains(search));
         }
-        
+
         if (provinceId != null) {
             spec = spec.and(DistrictSpecification.hasProvince(provinceId));
         }
         if (departmentId != null) {
             spec = spec.and(DistrictSpecification.hasDepartment(departmentId));
+        }
+
+        if (isShippingAvailable != null) {
+            spec = spec.and(
+                    DistrictSpecification.hasShippingAvailable(isShippingAvailable));
         }
 
         return districtRepository.findAll(spec, pageable)
@@ -77,18 +84,14 @@ public class DistrictServiceImpl implements DistrictService {
 
     @Override
     public DistrictAdminDetailResponse getDistrictDetailAdmin(Long id) {
-        District district = districtRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Distrito no encontrado con id: " + id));
+        District district = findDistrictOrThrow(id);
         return districtMapper.toAdminDetailResponse(district);
     }
 
     @Override
     @Transactional
-    public DistrictAdminDetailResponse createDistrict(DistrictCreateRequest request) {
-        Province province = provinceRepository.findById(request.getProvinceId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Provincia no encontrada con id: " + request.getProvinceId()));
+    public DistrictSummaryResponse createDistrict(DistrictCreateRequest request) {
+        Province province = findProvinceOrThrow(request.getProvinceId());
 
         if (districtRepository.existsByNameAndProvinceId(request.getName(), request.getProvinceId())) {
             throw new BadRequestException(
@@ -96,37 +99,51 @@ public class DistrictServiceImpl implements DistrictService {
         }
 
         District district = districtMapper.toEntity(request, province);
-        return districtMapper.toAdminDetailResponse(districtRepository.save(district));
+        return districtMapper.toSummaryResponse(districtRepository.save(district));
     }
 
     @Override
     @Transactional
-    public DistrictAdminDetailResponse updateDistrict(Long id, DistrictUpdateRequest request) {
-        District district = districtRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Distrito no encontrado con id: " + id));
-
-        Province province = null;
-        if (request.getProvinceId() != null) {
-            province = provinceRepository.findById(request.getProvinceId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Provincia no encontrada con id: " + request.getProvinceId()));
-        }
-
-        Province provinciaActual = province != null ? province : district.getProvince();
-
-
-        Long provinceIdAValidar = provinciaActual.getId();
-        String nameAValidar = request.getName() != null ? request.getName() : district.getName();
+    public DistrictSummaryResponse updateDistrict(Long id, DistrictUpdateRequest request) {
+        District district = findDistrictOrThrow(id);
 
         if (request.getName() != null &&
-                districtRepository.existsByNameAndProvinceIdAndIdNot(nameAValidar, provinceIdAValidar, id)) {
+                districtRepository.existsByNameAndProvinceIdAndIdNot(
+                        request.getName(),
+                        district.getProvince().getId(),
+                        id)) {
             throw new BadRequestException(
-                    "Ya existe un distrito con el nombre: " + nameAValidar + " en esta provincia");
+                    "Ya existe un distrito con el nombre: " + request.getName() + " en esta provincia");
         }
 
-        districtMapper.updateEntity(district, request, province);
-        return districtMapper.toAdminDetailResponse(districtRepository.save(district));
+        boolean willBeShippingAvailable = request.getIsShippingAvailable() != null
+                ? request.getIsShippingAvailable()
+                : district.isShippingAvailable();
+
+        BigDecimal finalShippingCost = request.getShippingCost() != null
+                ? request.getShippingCost()
+                : district.getShippingCost();
+
+        if (willBeShippingAvailable && finalShippingCost == null) {
+            throw new BadRequestException(
+                    "No se puede habilitar el envío sin un costo de envío");
+        }
+
+        districtMapper.updateEntity(district, request);
+        return districtMapper.toSummaryResponse(districtRepository.save(district));
     }
 
+    // ============ Helpers privados ============
+
+    private District findDistrictOrThrow(Long districtId) {
+        return districtRepository.findById(districtId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Distrito no encontrado con id: " + districtId));
+    }
+
+    private Province findProvinceOrThrow(Long provinceId) {
+        return provinceRepository.findById(provinceId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Provincia no encontrada con id: " + provinceId));
+    }
 }

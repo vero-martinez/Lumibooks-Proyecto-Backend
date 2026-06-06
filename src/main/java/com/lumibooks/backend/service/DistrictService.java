@@ -10,6 +10,7 @@ import com.lumibooks.backend.dto.district.request.DistrictUpdateRequest;
 import com.lumibooks.backend.dto.district.response.DistrictPublicResponse;
 import com.lumibooks.backend.dto.district.response.DistrictAdminDetailResponse;
 import com.lumibooks.backend.dto.district.response.DistrictSummaryResponse;
+import com.lumibooks.backend.exception.ResourceNotFoundException;
 
 /**
  * Intefaz para la gestión de distritos, incluyendo operaciones para el 
@@ -20,20 +21,21 @@ public interface DistrictService {
     /**
      * Retorna los distritos de una provincia ordenados alfabéticamente para selectores públicos.
      * @param provinceId identificador de la provincia
-     * @param search     búsqueda opcional por nombre
+     * @param search búsqueda opcional por nombre
      * @return lista de distritos de una provincia
      */
     List<DistrictPublicResponse> getDistrictsPublic(Long provinceId, String search);
 
     /**
      * Retorna distritos con filtros dinámicos para la tabla de administración.
-     * @param search     búsqueda por nombre
+     * @param search búsqueda por nombre
      * @param provinceId filtro por provincia
      * @param departmentId filtro por departamento
-     * @param pageable   paginación y ordenamiento
+     * @param isShippingAvailable filtro por disponibilidad de envío
+     * @param pageable paginación y ordenamiento
      * @return página de distritos en formato resumen
      */
-    Page<DistrictSummaryResponse> getDistrictsAdmin(String search, Long provinceId, Long departmentId, Pageable pageable);
+    Page<DistrictSummaryResponse> getDistrictsAdmin(String search, Long provinceId, Long departmentId, Boolean isShippingAvailable, Pageable pageable);
 
     /**
      * Retorna el detalle completo de un distrito para el panel de administración.
@@ -50,16 +52,16 @@ public interface DistrictService {
      * @throws ResourceNotFoundException si la provincia no existe
      * @throws BadRequestException si ya existe un distrito con el mismo nombre en la misma provincia
      */
-    DistrictAdminDetailResponse createDistrict(DistrictCreateRequest request);
+    DistrictSummaryResponse createDistrict(DistrictCreateRequest request);
 
     /**
      * Actualiza un distrito existente.
-     * @param id      identificador del distrito
+     * @param id identificador del distrito
      * @param request campos a actualizar
      * @return detalle del distrito actualizado
      * @throws ResourceNotFoundException si el distrito o la provincia no existe
      * @throws BadRequestException si ya existe un distrito con el mismo nombre en la misma provincia
      */
-    DistrictAdminDetailResponse updateDistrict(Long id, DistrictUpdateRequest request);
+    DistrictSummaryResponse updateDistrict(Long id, DistrictUpdateRequest request);
 
 }
