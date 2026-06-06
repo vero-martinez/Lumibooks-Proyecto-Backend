@@ -38,8 +38,9 @@ public class DistrictAdminController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long provinceId,
             @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) Boolean isShippingAvailable,
             Pageable pageable) {
-        return ResponseEntity.ok(districtService.getDistrictsAdmin(search, provinceId, departmentId, pageable));
+        return ResponseEntity.ok(districtService.getDistrictsAdmin(search, provinceId, departmentId, isShippingAvailable, pageable));
     }
 
     // Endpoint para obtener los detalles de un distrito en la parte administrativa
@@ -50,7 +51,7 @@ public class DistrictAdminController {
 
     // Endpoint para crear un nuevo distrito en la parte administrativa
     @PostMapping
-    public ResponseEntity<DistrictAdminDetailResponse> createDistrict(
+    public ResponseEntity<DistrictSummaryResponse> createDistrict(
             @RequestBody @Valid DistrictCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(districtService.createDistrict(request));
@@ -58,7 +59,7 @@ public class DistrictAdminController {
 
     // Endpoint para actualizar un distrito existente en la parte administrativa
     @PatchMapping("/{id}")
-    public ResponseEntity<DistrictAdminDetailResponse> updateDistrict(
+    public ResponseEntity<DistrictSummaryResponse> updateDistrict(
             @PathVariable Long id,
             @RequestBody @Valid DistrictUpdateRequest request) {
         return ResponseEntity.ok(districtService.updateDistrict(id, request));
