@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lumibooks.backend.dto.department.request.DepartmentCreateRequest;
-import com.lumibooks.backend.dto.department.request.DepartmentUpdateRequest;
+import com.lumibooks.backend.dto.department.request.DepartmentRequest;
 import com.lumibooks.backend.dto.department.response.DepartmentAdminDetailResponse;
 import com.lumibooks.backend.dto.department.response.DepartmentSummaryResponse;
 import com.lumibooks.backend.service.DepartmentService;
@@ -48,17 +47,17 @@ public class DepartmentAdminController {
 
     // Endpoint para crear un nuevo departamento
     @PostMapping
-    public ResponseEntity<DepartmentAdminDetailResponse> createDepartment(
-            @RequestBody @Valid DepartmentCreateRequest request) {
+    public ResponseEntity<DepartmentSummaryResponse> createDepartment(
+            @RequestBody @Valid DepartmentRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(departmentService.createDepartment(request));
     }
 
     // Endpoint para actualizar un departamento existente
     @PatchMapping("/{id}")
-    public ResponseEntity<DepartmentAdminDetailResponse> updateDepartment(
+    public ResponseEntity<DepartmentSummaryResponse> updateDepartment(
             @PathVariable Long id,
-            @RequestBody @Valid DepartmentUpdateRequest request) {
+            @RequestBody @Valid DepartmentRequest request) {
         return ResponseEntity.ok(departmentService.updateDepartment(id, request));
     }
 
