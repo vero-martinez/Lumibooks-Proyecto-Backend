@@ -18,6 +18,4 @@ public class ProvinceUpdateRequest {
     @Size(max = 150, message = "El nombre no puede superar los 150 caracteres")
     private String name;
 
-    private Long departmentId;
-
 }
