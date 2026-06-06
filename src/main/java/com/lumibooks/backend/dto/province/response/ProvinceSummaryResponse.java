@@ -3,6 +3,7 @@ package com.lumibooks.backend.dto.province.response;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lumibooks.backend.dto.department.response.DepartmentPublicResponse;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -17,9 +18,12 @@ public class ProvinceSummaryResponse {
 
     private Long id;
     private String name;
-    private String departmentName;
+    private DepartmentPublicResponse department;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime updatedAt;
 
 }
