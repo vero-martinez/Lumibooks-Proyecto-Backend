@@ -25,4 +25,9 @@ public class DistrictSpecification {
         return (root, query, cb) -> cb.equal(root.get("province").get("department").get("id"), departmentId);
     }
 
+    // Filtrar por disponibilidad de envío
+    public static Specification<District> hasShippingAvailable(boolean isShippingAvailable) {
+        return (root, query, cb) -> cb.equal(root.get("isShippingAvailable"), isShippingAvailable);
+    }
+
 }
