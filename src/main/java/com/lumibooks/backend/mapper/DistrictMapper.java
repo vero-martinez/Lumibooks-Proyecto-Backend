@@ -4,18 +4,21 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
+import com.lumibooks.backend.dto.department.response.DepartmentPublicResponse;
 import com.lumibooks.backend.dto.district.request.DistrictCreateRequest;
 import com.lumibooks.backend.dto.district.request.DistrictUpdateRequest;
 import com.lumibooks.backend.dto.district.response.DistrictAdminDetailResponse;
 import com.lumibooks.backend.dto.district.response.DistrictPublicResponse;
 import com.lumibooks.backend.dto.district.response.DistrictSummaryResponse;
+import com.lumibooks.backend.dto.province.response.ProvincePublicResponse;
 import com.lumibooks.backend.entity.District;
 import com.lumibooks.backend.entity.Province;
 
 import lombok.RequiredArgsConstructor;
 
 /**
- * Mapper para convertir entre entidades de distrito y sus DTOs correspondientes.
+ * Mapper para convertir entre entidades de distrito y sus DTOs
+ * correspondientes.
  */
 @RequiredArgsConstructor
 @Component
@@ -26,7 +29,6 @@ public class DistrictMapper {
         return DistrictPublicResponse.builder()
                 .id(district.getId())
                 .name(district.getName())
-                .shippingCost(district.getShippingCost())
                 .build();
     }
 
@@ -34,10 +36,17 @@ public class DistrictMapper {
         return DistrictSummaryResponse.builder()
                 .id(district.getId())
                 .name(district.getName())
-                .provinceName(district.getProvince().getName())
-                .departmentName(district.getProvince().getDepartment().getName())
+                .department(DepartmentPublicResponse.builder()
+                        .id(district.getProvince().getDepartment().getId())
+                        .name(district.getProvince().getDepartment().getName())
+                        .build())
+                .province(ProvincePublicResponse.builder()
+                        .id(district.getProvince().getId())
+                        .name(district.getProvince().getName())
+                        .build())
                 .shippingCost(district.getShippingCost())
                 .createdAt(district.getCreatedAt())
+                .isShippingAvailable(district.isShippingAvailable())
                 .build();
     }
 
@@ -45,11 +54,10 @@ public class DistrictMapper {
         return DistrictAdminDetailResponse.builder()
                 .id(district.getId())
                 .name(district.getName())
-                .provinceId(district.getProvince().getId())
                 .provinceName(district.getProvince().getName())
-                .departmentId(district.getProvince().getDepartment().getId())
                 .departmentName(district.getProvince().getDepartment().getName())
                 .shippingCost(district.getShippingCost())
+                .isShippingAvailable(district.isShippingAvailable())
                 .createdAt(district.getCreatedAt())
                 .updatedAt(district.getUpdatedAt())
                 .build();
@@ -64,10 +72,10 @@ public class DistrictMapper {
                 .build();
     }
 
-    public void updateEntity(District district, DistrictUpdateRequest request, Province province) {
+    public void updateEntity(District district, DistrictUpdateRequest request) {
         Optional.ofNullable(request.getName()).ifPresent(district::setName);
-        Optional.ofNullable(province).ifPresent(district::setProvince);
         Optional.ofNullable(request.getShippingCost()).ifPresent(district::setShippingCost);
+        Optional.ofNullable(request.getIsShippingAvailable()).ifPresent(district::setShippingAvailable);
     }
 
 }
