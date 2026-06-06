@@ -19,16 +19,16 @@ public interface ProvinceService {
     /**
      * Retorna las provincias activas de un departamento ordenadas alfabéticamente para selectores públicos.
      * @param departmentId identificador del departamento
-     * @param search       búsqueda opcional por nombre
+     * @param search búsqueda opcional por nombre
      * @return lista de provincias activas del departamento
      */
     List<ProvincePublicResponse> getProvincesPublic(Long departmentId, String search);
 
     /**
      * Retorna provincias con filtros dinámicos para la tabla de administración.
-     * @param search       búsqueda por nombre
+     * @param search búsqueda por nombre
      * @param departmentId filtro por departamento
-     * @param pageable     paginación y ordenamiento
+     * @param pageable paginación y ordenamiento
      * @return página de provincias en formato resumen
      */
     Page<ProvinceSummaryResponse> getProvincesAdmin(String search, Long departmentId, Pageable pageable);
@@ -48,16 +48,16 @@ public interface ProvinceService {
      * @throws ResourceNotFoundException si el departamento no existe
      * @throws BadRequestException si ya existe una provincia con el mismo nombre en el mismo departamento
      */
-    ProvinceAdminDetailResponse createProvince(ProvinceCreateRequest request);
+    ProvinceSummaryResponse createProvince(ProvinceCreateRequest request);
 
     /**
      * Actualiza una provincia existente.
-     * @param id      identificador de la provincia
+     * @param id identificador de la provincia
      * @param request campos a actualizar
      * @return detalle de la provincia actualizada
      * @throws ResourceNotFoundException si la provincia o el departamento no existe
      * @throws BadRequestException si ya existe una provincia con el mismo nombre en el mismo departamento
      */
-    ProvinceAdminDetailResponse updateProvince(Long id, ProvinceUpdateRequest request);
+    ProvinceSummaryResponse updateProvince(Long id, ProvinceUpdateRequest request);
 
 }
