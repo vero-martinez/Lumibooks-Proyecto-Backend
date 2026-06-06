@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.lumibooks.backend.dto.department.request.DepartmentRequest;
 import com.lumibooks.backend.dto.department.response.DepartmentSummaryResponse;
+import com.lumibooks.backend.dto.province.response.ProvincePublicResponse;
 import com.lumibooks.backend.dto.department.response.DepartmentAdminDetailResponse;
 import com.lumibooks.backend.dto.department.response.DepartmentPublicResponse;
 import com.lumibooks.backend.entity.Department;
@@ -19,9 +20,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Component
 public class DepartmentMapper {
-
-    private final ProvinceMapper provinceMapper;
-
 
     // ============ Entity --> Response DTO ============
     public DepartmentPublicResponse toPublicResponse(Department department) {
@@ -48,7 +46,10 @@ public class DepartmentMapper {
                 .name(department.getName())
                 .provinceCount(provinces.size())
                 .provinces(provinces.stream()
-                        .map(provinceMapper::toPublicResponse)
+                        .map(p -> ProvincePublicResponse.builder()
+                                .id(p.getId())
+                                .name(p.getName())
+                                .build())
                         .toList())
                 .createdAt(department.getCreatedAt())
                 .updatedAt(department.getUpdatedAt())
