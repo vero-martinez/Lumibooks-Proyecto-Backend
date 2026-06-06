@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.lumibooks.backend.dto.department.response.DepartmentPublicResponse;
+import com.lumibooks.backend.dto.province.response.ProvincePublicResponse;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -18,9 +20,10 @@ public class DistrictSummaryResponse {
 
     private Long id;
     private String name;
-    private String provinceName;
-    private String departmentName;
+    private ProvincePublicResponse province;
+    private DepartmentPublicResponse department;
     private BigDecimal shippingCost;
+    private Boolean isShippingAvailable;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;
