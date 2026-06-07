@@ -3,8 +3,6 @@ package com.lumibooks.backend.dto.order.response;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.lumibooks.backend.dto.address.response.AddressResponse;
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,9 +15,8 @@ import lombok.Getter;
 public class CheckoutPreviewResponse {
 
     private List<OrderItemResponse> items;
-    private AddressResponse address;
+    private CheckoutAddressResponse address;
     private BigDecimal subtotal;
-    private BigDecimal shippingCost;
     private BigDecimal total;
 
 }
