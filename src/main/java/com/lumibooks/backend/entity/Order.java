@@ -71,7 +71,7 @@ public class Order {
     @Column(name = "recipient_name", nullable = false, length = 150)
     private String recipientName;
 
-    @Column(name = "dni", nullable = false, length = 8)
+    @Column(name = "dni", nullable = false, columnDefinition = "bpchar(8)")
     private String dni;
 
     @Column(name = "phone", nullable = false, length = 20)
