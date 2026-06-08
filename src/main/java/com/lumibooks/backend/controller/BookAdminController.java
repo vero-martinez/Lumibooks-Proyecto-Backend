@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lumibooks.backend.dto.request.BookCreateRequest;
 import com.lumibooks.backend.dto.request.BookUpdateRequest;
 import com.lumibooks.backend.dto.response.BookAdminDetailResponse;
+import com.lumibooks.backend.dto.response.BookResponse;
 import com.lumibooks.backend.dto.response.BookSummaryResponse;
 import com.lumibooks.backend.enums.BookLanguage;
 import com.lumibooks.backend.service.BookService;
@@ -72,7 +73,7 @@ public class BookAdminController {
      * @return detalle del libro creado con status 201
      */
     @PostMapping
-    public ResponseEntity<BookAdminDetailResponse> createBook(
+    public ResponseEntity<BookResponse> createBook(
             @RequestBody @Valid BookCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bookService.createBook(request));
     }
@@ -85,10 +86,9 @@ public class BookAdminController {
      * @return detalle del libro actualizado
      */
     @PatchMapping("/{id}")
-    public ResponseEntity<BookAdminDetailResponse> updateBook(
+    public ResponseEntity<BookResponse> updateBook(
             @PathVariable Long id,
             @RequestBody @Valid BookUpdateRequest request) {
-
         return ResponseEntity.ok(bookService.updateBook(id, request));
     }
 
