@@ -3,6 +3,7 @@ package com.lumibooks.backend.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,16 +11,15 @@ import org.springframework.stereotype.Repository;
 
 import com.lumibooks.backend.entity.Wishlist;
 
-/**
- * Repositorio para la entidad Wishlist, extendiendo JpaRepository.
- */
 @Repository
 public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
 
-    // Obtener todas las listas de un usuario
+    // Listas de un usuario con items precargados — necesario para calcular itemCount en toResponse (evita N+1)
+    @EntityGraph(attributePaths = { "items" })
     List<Wishlist> findByUserId(Long userId);
 
-    // Obtener una lista específica de un usuario
+    // Lista específica de un usuario con items y sus libros/autores precargados — usado en getWishlistDetail (evita N+1)
+    @EntityGraph(attributePaths = { "items", "items.book", "items.book.authors" })
     Optional<Wishlist> findByIdAndUserId(Long id, Long userId);
 
     // Verificar si el usuario ya tiene una lista con ese nombre
@@ -28,7 +28,8 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
     // Verificar si el usuario ya tiene una lista con ese nombre excluyendo la actual (rename)
     boolean existsByUserIdAndNameIgnoreCaseAndIdNot(Long userId, String name, Long id);
 
-    // Obtener listas del usuario que contienen un libro específico (para verificar estado del libro en las listas)
+    // Listas del usuario que contienen un libro específico con items precargados — usado en getBookStatus (evita N+1)
+    @EntityGraph(attributePaths = { "items", "items.book" })
     @Query("""
             SELECT w FROM Wishlist w
             JOIN w.items i
