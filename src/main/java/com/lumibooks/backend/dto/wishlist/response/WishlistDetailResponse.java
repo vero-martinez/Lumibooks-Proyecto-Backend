@@ -2,7 +2,7 @@ package com.lumibooks.backend.dto.wishlist.response;
 
 import java.util.List;
 
-import com.lumibooks.backend.dto.response.BookCardResponse;
+import com.lumibooks.backend.dto.response.BookWishlistResponse;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -16,6 +16,6 @@ public class WishlistDetailResponse {
 
     private Long id;
     private String name;
-    private List<BookCardResponse> books;
+    private List<BookWishlistResponse> books;
 
 }
