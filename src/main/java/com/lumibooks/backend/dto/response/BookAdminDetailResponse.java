@@ -37,6 +37,8 @@ public class BookAdminDetailResponse {
     private List<String> categories;
     private Integer stock;
     private boolean isActive;
+    private Double averageRating;
+    private Long totalReviews;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime createdAt;

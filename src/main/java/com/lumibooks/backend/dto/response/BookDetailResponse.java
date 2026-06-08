@@ -34,5 +34,7 @@ public class BookDetailResponse {
     private BookFormat format;
     private Short editionYear;
     private List<String> categories;
+    private Double averageRating;
+    private Long totalReviews;
 
 }

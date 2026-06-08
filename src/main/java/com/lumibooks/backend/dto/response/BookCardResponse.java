@@ -19,5 +19,7 @@ public class BookCardResponse {
     private String title;
     private List<String> authors;
     private BigDecimal price;
+    private Double averageRating;
+    private Long totalReviews;
     
 }
