@@ -10,21 +10,16 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * DTO que representa la información a detalle de un libro
- * utilizada en la vista pública de detalle del libro.
+ * DTO que representa la información a detalle de un libro al ser creado o editado
  */
 @Getter
 @Builder
-public class BookDetailResponse {
+public class BookResponse {
 
     private Long id;
     private String coverImageUrl;
     private String title;
     private List<AuthorPublicResponse> authors;
-    /**
-     * Indica si el libro está disponible (Stock > 0)
-     */
-    private boolean available; 
     private String description;
     private BigDecimal price;
     private String isbn;
@@ -34,7 +29,5 @@ public class BookDetailResponse {
     private BookFormat format;
     private Short editionYear;
     private List<String> categories;
-    private Double averageRating;
-    private Long totalReviews;
 
 }

@@ -2,7 +2,9 @@ package com.lumibooks.backend.service.impl;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +17,7 @@ import com.lumibooks.backend.dto.request.BookUpdateRequest;
 import com.lumibooks.backend.dto.response.BookAdminDetailResponse;
 import com.lumibooks.backend.dto.response.BookCardResponse;
 import com.lumibooks.backend.dto.response.BookDetailResponse;
+import com.lumibooks.backend.dto.response.BookResponse;
 import com.lumibooks.backend.dto.response.BookSummaryResponse;
 import com.lumibooks.backend.entity.Author;
 import com.lumibooks.backend.entity.Book;
@@ -22,6 +25,7 @@ import com.lumibooks.backend.entity.Category;
 import com.lumibooks.backend.entity.Publisher;
 import com.lumibooks.backend.enums.BookFormat;
 import com.lumibooks.backend.enums.BookLanguage;
+import com.lumibooks.backend.enums.ReviewStatus;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.mapper.BookMapper;
@@ -29,6 +33,7 @@ import com.lumibooks.backend.repository.AuthorRepository;
 import com.lumibooks.backend.repository.BookRepository;
 import com.lumibooks.backend.repository.CategoryRepository;
 import com.lumibooks.backend.repository.PublisherRepository;
+import com.lumibooks.backend.repository.ReviewRepository;
 import com.lumibooks.backend.service.BookService;
 import com.lumibooks.backend.specification.BookSpecification;
 
@@ -46,18 +51,33 @@ public class BookServiceImpl implements BookService {
     private final AuthorRepository authorRepository;
     private final CategoryRepository categoryRepository;
     private final PublisherRepository publisherRepository;
+    private final ReviewRepository reviewRepository;
     private final BookMapper bookMapper;
 
-    // ============ Público ============
+    // ================================ PÚBLICO ===============================================
 
+    // Obtener los 10 libros creados recientemente
     @Override
     public List<BookCardResponse> getLatestBooks() {
-        return bookRepository.findTop10ByIsActiveTrueOrderByCreatedAtDesc()
-                .stream()
-                .map(bookMapper::toCardResponse)
+        List<Book> books = bookRepository.findTop10ByIsActiveTrueOrderByCreatedAtDesc();
+        Map<Long, double[]> statsMap = getRatingStatsMap(books.stream().map(Book::getId).toList());
+        return books.stream()
+                .map(book -> toCardResponseWithStats(book, statsMap))
                 .toList();
     }
 
+    // Obtener los 10 libros mejor calificados
+    @Override
+    public List<BookCardResponse> getTopRatedBooks() {
+        List<Long> bookIds = reviewRepository.findTop10BookIdsByAverageRating(ReviewStatus.OCULTA);
+        List<Book> books = bookRepository.findAllById(bookIds);
+        Map<Long, double[]> statsMap = getRatingStatsMap(bookIds);
+        return books.stream()
+                .map(book -> toCardResponseWithStats(book, statsMap))
+                .toList();
+    }
+
+    // Obtener todos los libros para el público
     @Override
     public Page<BookCardResponse> getBooks(
             String search,
@@ -93,20 +113,23 @@ public class BookServiceImpl implements BookService {
             spec = spec.and(BookSpecification.hasMaxPrice(maxPrice));
         }
 
-        return bookRepository.findAll(spec, pageable)
-                .map(bookMapper::toCardResponse);
+        Page<Book> books = bookRepository.findAll(spec, pageable);
+        Map<Long, double[]> statsMap = getRatingStatsMap(books.map(Book::getId).toList());
+        return books.map(book -> toCardResponseWithStats(book, statsMap));
     }
 
+    // Obtener el detalle completo de un libro para el público
     @Override
     public BookDetailResponse getBookDetail(Long id) {
         Book book = bookRepository.findByIdAndIsActiveTrue(id)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Libro no encontrado"));
-        return bookMapper.toDetailResponse(book);
+                .orElseThrow(() -> new ResourceNotFoundException("Libro no encontrado"));
+        double[] stats = getStats(book.getId(), getRatingStatsMap(List.of(book.getId())));
+        return bookMapper.toDetailResponse(book, stats[0], (long) stats[1]);
     }
 
-    // ============ Admin ============
+    // ================================ ADMIN =================================================
 
+    // Obtener todos los libros en la tabla de admin
     @Override
     public Page<BookSummaryResponse> getBooksAdmin(
             String search,
@@ -130,34 +153,34 @@ public class BookServiceImpl implements BookService {
                 .map(bookMapper::toSummaryResponse);
     }
 
+    // Obtener el detalle completo de un libro en admin
     @Override
     public BookAdminDetailResponse getBookDetailAdmin(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Libro no encontrado con id: " + id));
-        return bookMapper.toAdminDetailResponse(book);
+        double[] stats = getStats(book.getId(), getRatingStatsMap(List.of(book.getId())));
+        return bookMapper.toAdminDetailResponse(book, stats[0], (long) stats[1]);
     }
 
+    // Crear un libro
     @Override
     @Transactional
-    public BookAdminDetailResponse createBook(BookCreateRequest request) {
+    public BookResponse createBook(BookCreateRequest request) {
         validateIsbnNotExists(request.getIsbn());
 
-        Publisher publisher = resolvePublisher(request.getPublisherId());
-        Set<Author> authors = resolveAuthors(request.getAuthorIds());
-        Set<Category> categories = resolveCategories(request.getCategoryIds());
-
         Book book = bookMapper.toEntity(request);
-        book.setPublisher(publisher);
-        book.setAuthors(authors);
-        book.setCategories(categories);
+        book.setPublisher(getPublisherOrThrow(request.getPublisherId()));
+        book.setAuthors(getAuthorsOrThrow(request.getAuthorIds()));
+        book.setCategories(getCategoriesOrThrow(request.getCategoryIds()));
 
-        return bookMapper.toAdminDetailResponse(bookRepository.save(book));
+        return bookMapper.toBookResponse(bookRepository.save(book));
     }
 
+    // Editar un libro
     @Override
     @Transactional
-    public BookAdminDetailResponse updateBook(Long id, BookUpdateRequest request) {
+    public BookResponse updateBook(Long id, BookUpdateRequest request) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Libro no encontrado con id: " + id));
@@ -165,18 +188,19 @@ public class BookServiceImpl implements BookService {
         bookMapper.updateEntity(request, book);
 
         if (request.getPublisherId() != null) {
-            book.setPublisher(resolvePublisher(request.getPublisherId()));
+            book.setPublisher(getPublisherOrThrow(request.getPublisherId()));
         }
         if (request.getAuthorIds() != null) {
-            book.setAuthors(resolveAuthors(request.getAuthorIds()));
+            book.setAuthors(getAuthorsOrThrow(request.getAuthorIds()));
         }
         if (request.getCategoryIds() != null) {
-            book.setCategories(resolveCategories(request.getCategoryIds()));
+            book.setCategories(getCategoriesOrThrow(request.getCategoryIds()));
         }
 
-        return bookMapper.toAdminDetailResponse(bookRepository.save(book));
+        return bookMapper.toBookResponse(bookRepository.save(book));
     }
 
+    // Cambiar el estatus de un libro
     @Override
     @Transactional
     public void toggleBookStatus(Long id) {
@@ -187,21 +211,24 @@ public class BookServiceImpl implements BookService {
         bookRepository.save(book);
     }
 
-    // ============ Helpers privados ============
+    // ======================= HELPERS PRIVADOS ==============================================
 
+    // Valida que no exista otro libro con el mismo ISBN.
     private void validateIsbnNotExists(String isbn) {
         if (bookRepository.existsByIsbn(isbn)) {
             throw new BadRequestException("Ya existe un libro con el ISBN: " + isbn);
         }
     }
 
-    private Publisher resolvePublisher(Long publisherId) {
+    // Obtiene la editorial por su ID o lanza una excepción si no existe.
+    private Publisher getPublisherOrThrow(Long publisherId) {
         return publisherRepository.findById(publisherId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Editorial no encontrada con id: " + publisherId));
     }
 
-    private Set<Author> resolveAuthors(Set<Long> authorIds) {
+    // Obtiene los autores por sus IDs o lanza una excepción si alguno no existe.
+    private Set<Author> getAuthorsOrThrow(Set<Long> authorIds) {
         Set<Author> authors = Set.copyOf(authorRepository.findAllById(authorIds));
         if (authors.size() != authorIds.size()) {
             throw new ResourceNotFoundException("Uno o más autores no fueron encontrados");
@@ -209,12 +236,34 @@ public class BookServiceImpl implements BookService {
         return authors;
     }
 
-    private Set<Category> resolveCategories(Set<Long> categoryIds) {
+    // Obtiene las categorías por sus IDs o lanza una excepción si alguna no existe.
+    private Set<Category> getCategoriesOrThrow(Set<Long> categoryIds) {
         Set<Category> categories = Set.copyOf(categoryRepository.findAllById(categoryIds));
         if (categories.size() != categoryIds.size()) {
             throw new ResourceNotFoundException("Una o más categorías no fueron encontradas");
         }
         return categories;
+    }
+
+    // Obtiene las estadísticas de calificación de los libros indicados.
+    private Map<Long, double[]> getRatingStatsMap(List<Long> bookIds) {
+        return reviewRepository
+                .findRatingStatsByBookIds(bookIds, ReviewStatus.OCULTA)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> new double[] { (Double) row[1], (double) (Long) row[2] }));
+    }
+
+    // Obtiene las estadísticas de calificación de un libro.
+    private double[] getStats(Long bookId, Map<Long, double[]> statsMap) {
+        return statsMap.getOrDefault(bookId, new double[] { 0.0, 0 });
+    }
+
+    // Convierte un libro a su respuesta de tarjeta incluyendo estadísticas de calificación.
+    private BookCardResponse toCardResponseWithStats(Book book, Map<Long, double[]> statsMap) {
+        double[] stats = getStats(book.getId(), statsMap);
+        return bookMapper.toCardResponse(book, stats[0], (long) stats[1]);
     }
 
 }

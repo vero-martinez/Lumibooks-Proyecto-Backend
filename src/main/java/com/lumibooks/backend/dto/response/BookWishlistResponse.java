@@ -8,18 +8,16 @@ import lombok.Getter;
 
 /**
  * DTO que representa la información básica de un libro
- * utilizada en la vista de tarjetas (cards).
+ * utilizada en la lista de deseos.
  */
 @Getter
 @Builder
-public class BookCardResponse {
+public class BookWishlistResponse {
 
     private Long id;
     private String coverImageUrl;
     private String title;
     private List<String> authors;
     private BigDecimal price;
-    private Double averageRating;
-    private Long totalReviews;
-    
+
 }

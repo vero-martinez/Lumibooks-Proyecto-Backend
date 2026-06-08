@@ -54,7 +54,7 @@ public class WishlistServiceImpl implements WishlistService {
     public WishlistDetailResponse getWishlistDetail(Long wishlistId) {
         User user = authenticatedUserProvider.getAuthenticatedUser();
         Wishlist wishlist = resolveWishlist(wishlistId, user.getId());
-        return wishlistMapper.toDetailResponse(wishlist);
+        return wishlistMapper.toWishlistDetailResponse(wishlist);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class WishlistServiceImpl implements WishlistService {
         if (totalWishlists >= 5) {
             throw new BadRequestException("No puedes tener más de 5 listas de deseos");
         }
-        
+
         validateNameNotTaken(user.getId(), request.getName(), null);
 
         Wishlist wishlist = wishlistMapper.toEntity(request, user);

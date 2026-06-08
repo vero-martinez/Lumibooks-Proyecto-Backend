@@ -21,53 +21,51 @@ import lombok.RequiredArgsConstructor;
 @Component
 public class WishlistMapper {
 
-    private final BookMapper bookMapper;
+        private final BookMapper bookMapper;
 
-    // ============ Entity --> Response DTO ============
+        // ============ Entity --> Response DTO ============
 
-    public WishlistResponse toResponse(Wishlist wishlist) {
-        return WishlistResponse.builder()
-                .id(wishlist.getId())
-                .name(wishlist.getName())
-                .itemCount(wishlist.getItems().size())
-                .build();
-    }
+        public WishlistResponse toResponse(Wishlist wishlist) {
+                return WishlistResponse.builder()
+                                .id(wishlist.getId())
+                                .name(wishlist.getName())
+                                .itemCount(wishlist.getItems().size())
+                                .build();
+        }
 
-    public WishlistDetailResponse toDetailResponse(Wishlist wishlist) {
-        return WishlistDetailResponse.builder()
-                .id(wishlist.getId())
-                .name(wishlist.getName())
-                .books(wishlist.getItems().stream()
-                        .map(item -> bookMapper.toCardResponse(item.getBook()))
-                        .toList())
-                .build();
-    }
+        public WishlistDetailResponse toWishlistDetailResponse(Wishlist wishlist) {
+                return WishlistDetailResponse.builder()
+                                .id(wishlist.getId())
+                                .name(wishlist.getName())
+                                .books(wishlist.getItems().stream()
+                                                .map(item -> bookMapper.toWishlistResponse(item.getBook()))
+                                                .toList())
+                                .build();
+        }
 
-    public WishlistBookStatusResponse toBookStatusResponse(Long bookId, List<Wishlist> wishlists) {
-        List<WishlistResponse> matchingWishlists = wishlists.stream()
-                .filter(w -> w.getItems().stream()
-                        .anyMatch(item -> item.getBook().getId().equals(bookId)))
-                .map(this::toResponse)
-                .toList();
+        public WishlistBookStatusResponse toBookStatusResponse(Long bookId, List<Wishlist> wishlists) {
+                List<WishlistResponse> matchingWishlists = wishlists.stream()
+                                .map(this::toResponse)
+                                .toList();
 
-        return WishlistBookStatusResponse.builder()
-                .bookId(bookId)
-                .inWishlist(!matchingWishlists.isEmpty())
-                .wishlists(matchingWishlists)
-                .build();
-    }
+                return WishlistBookStatusResponse.builder()
+                                .bookId(bookId)
+                                .inWishlist(!matchingWishlists.isEmpty())
+                                .wishlists(matchingWishlists)
+                                .build();
+        }
 
-    // ============ Request --> Entity ============
+        // ============ Request --> Entity ============
 
-    public Wishlist toEntity(WishlistNameRequest request, User user) {
-        return Wishlist.builder()
-                .name(request.getName())
-                .user(user)
-                .build();
-    }
+        public Wishlist toEntity(WishlistNameRequest request, User user) {
+                return Wishlist.builder()
+                                .name(request.getName())
+                                .user(user)
+                                .build();
+        }
 
-    public void renameEntity(WishlistNameRequest request, Wishlist wishlist) {
-        wishlist.setName(request.getName());
-    }
+        public void renameEntity(WishlistNameRequest request, Wishlist wishlist) {
+                wishlist.setName(request.getName());
+        }
 
 }
