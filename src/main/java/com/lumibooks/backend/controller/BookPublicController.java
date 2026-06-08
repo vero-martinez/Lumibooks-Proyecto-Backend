@@ -15,15 +15,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lumibooks.backend.dto.response.BookCardResponse;
 import com.lumibooks.backend.dto.response.BookDetailResponse;
+import com.lumibooks.backend.dto.review.response.ReviewPublicResponse;
 import com.lumibooks.backend.enums.BookFormat;
 import com.lumibooks.backend.enums.BookLanguage;
 import com.lumibooks.backend.service.BookService;
+import com.lumibooks.backend.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
 
 /**
  * Controlador público para la consulta de libros.
- * Expone endpoints públicos para la landing, catálogo y detalle de libros activos.
+ * Expone endpoints públicos para la landing, catálogo y detalle de libros
+ * activos.
  */
 @RestController
 @RequestMapping("/api/public/books")
@@ -31,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class BookPublicController {
 
     private final BookService bookService;
+    private final ReviewService reviewService;
 
     /**
      * Retorna los 10 libros activos más recientes para la landing.
@@ -78,6 +82,14 @@ public class BookPublicController {
     @GetMapping("/{id}")
     public ResponseEntity<BookDetailResponse> getBookDetail(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.getBookDetail(id));
+    }
+
+    @GetMapping("/{bookId}/reviews")
+    public ResponseEntity<Page<ReviewPublicResponse>> getBookReviews(
+            @PathVariable Long bookId,
+            @RequestParam(required = false) Integer rating,
+            Pageable pageable) {
+        return ResponseEntity.ok(reviewService.getBookReviews(bookId, rating, pageable));
     }
 
 }
