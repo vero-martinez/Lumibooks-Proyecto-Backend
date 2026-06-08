@@ -64,7 +64,7 @@ public class Review {
     @Column(name = "rating", nullable = false)
     private Integer rating;
 
-    @Column(name = "comment", columnDefinition = "TEXT")
+    @Column(name = "comment", nullable = false, columnDefinition = "TEXT")
     private String comment;
 
     @Enumerated(EnumType.STRING)

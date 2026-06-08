@@ -1,5 +1,6 @@
 package com.lumibooks.backend.dto.review.request;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ReviewUpdateRequest {
 
+    @NotBlank(message = "El comentario es obligatorio")
     @Size(max = 1000, message = "El comentario no puede superar los 1000 caracteres")
     private String comment;
 
