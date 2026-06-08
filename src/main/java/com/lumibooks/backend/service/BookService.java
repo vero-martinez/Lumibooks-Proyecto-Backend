@@ -11,6 +11,7 @@ import com.lumibooks.backend.dto.request.BookUpdateRequest;
 import com.lumibooks.backend.dto.response.BookAdminDetailResponse;
 import com.lumibooks.backend.dto.response.BookCardResponse;
 import com.lumibooks.backend.dto.response.BookDetailResponse;
+import com.lumibooks.backend.dto.response.BookResponse;
 import com.lumibooks.backend.dto.response.BookSummaryResponse;
 import com.lumibooks.backend.enums.BookFormat;
 import com.lumibooks.backend.enums.BookLanguage;
@@ -22,6 +23,8 @@ public interface BookService {
      * para mostrar en la página principal.
      */
     List<BookCardResponse> getLatestBooks();
+
+    List<BookCardResponse> getTopRatedBooks();
 
     /**
      * Obtiene una lista paginada de libros públicos
@@ -86,7 +89,7 @@ public interface BookService {
      * @param request datos del libro a crear
      * @return libro creado
      */
-    BookAdminDetailResponse createBook(BookCreateRequest request);
+    BookResponse createBook(BookCreateRequest request);
 
     /**
      * Actualiza parcialmente la información de un libro.
@@ -95,7 +98,7 @@ public interface BookService {
      * @param request datos a actualizar
      * @return libro actualizado
      */
-    BookAdminDetailResponse updateBook(Long id, BookUpdateRequest request);
+    BookResponse updateBook(Long id, BookUpdateRequest request);
 
     /**
      * Cambia el estado de un libro
