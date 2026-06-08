@@ -12,8 +12,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.lumibooks.backend.entity.Book;
 import com.lumibooks.backend.entity.Order;
 import com.lumibooks.backend.enums.OrderStatus;
+import com.lumibooks.backend.enums.ReviewStatus;
 import com.lumibooks.backend.enums.RoleUser;
 
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
@@ -60,4 +62,34 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
         Long findManagerIdWithLeastActiveOrders(
                         @Param("activeStatuses") List<OrderStatus> activeStatuses,
                         @Param("role") RoleUser role);
+
+        @Query("""
+                        SELECT COUNT(o) > 0 FROM Order o
+                        JOIN o.items i
+                        WHERE o.user.id = :userId
+                        AND i.book.id = :bookId
+                        AND o.status = :status
+                        """)
+        boolean existsDeliveredOrderWithBook(
+                        @Param("userId") Long userId,
+                        @Param("bookId") Long bookId,
+                        @Param("status") OrderStatus status);
+
+        @Query("""
+                        SELECT DISTINCT i.book FROM Order o
+                        JOIN o.items i
+                        WHERE o.user.id = :userId
+                        AND o.status = :status
+                        AND NOT EXISTS (
+                            SELECT r FROM Review r
+                            WHERE r.user.id = :userId
+                            AND r.book.id = i.book.id
+                            AND r.status != :hiddenStatus
+                        )
+                        """)
+        Page<Book> findBooksWithoutReviewByUserId(
+                        @Param("userId") Long userId,
+                        @Param("status") OrderStatus status,
+                        @Param("hiddenStatus") ReviewStatus hiddenStatus,
+                        Pageable pageable);
 }
