@@ -47,6 +47,16 @@ public class BookPublicController {
     }
 
     /**
+     * Retorna los 10 libros mejor calificados para la landing.
+     *
+     * @return lista de hasta 10 libros en formato card
+     */
+    @GetMapping("/top-rated")
+    public ResponseEntity<List<BookCardResponse>> getTopRatedBooks() {
+        return ResponseEntity.ok(bookService.getTopRatedBooks());
+    }
+
+    /**
      * Retorna libros activos con filtros dinámicos para el catálogo público.
      *
      * @param search      búsqueda por título, ISBN o autor
