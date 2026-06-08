@@ -54,4 +54,8 @@ public class Author {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
 }
