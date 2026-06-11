@@ -17,6 +17,7 @@ import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.mapper.UserMapper;
 import com.lumibooks.backend.repository.UserRepository;
+import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.service.UserService;
 import com.lumibooks.backend.specification.UserSpecification;
 
@@ -33,6 +34,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+
+    private final NotificationService notificationService;
 
     // ============ Admin ============
 
@@ -87,7 +90,15 @@ public class UserServiceImpl implements UserService {
 
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         User user = userMapper.toEntity(request, encodedPassword);
-        return userMapper.toAdminDetailResponse(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+
+        notificationService.sendNotification(
+                savedUser,
+                "¡Bienvenido a LumiBooks!",
+                "Hola " + savedUser.getFullName()
+                        + ", gracias por unirte a LumiBooks. ¡Esperamos que disfrutes tu experiencia!");
+
+        return userMapper.toAdminDetailResponse(savedUser);
     }
 
     @Override

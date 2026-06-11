@@ -26,6 +26,7 @@ import com.lumibooks.backend.entity.Publisher;
 import com.lumibooks.backend.enums.BookFormat;
 import com.lumibooks.backend.enums.BookLanguage;
 import com.lumibooks.backend.enums.ReviewStatus;
+import com.lumibooks.backend.enums.RoleUser;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.mapper.BookMapper;
@@ -34,7 +35,9 @@ import com.lumibooks.backend.repository.BookRepository;
 import com.lumibooks.backend.repository.CategoryRepository;
 import com.lumibooks.backend.repository.PublisherRepository;
 import com.lumibooks.backend.repository.ReviewRepository;
+import com.lumibooks.backend.repository.UserRepository;
 import com.lumibooks.backend.service.BookService;
+import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.specification.BookSpecification;
 
 import lombok.RequiredArgsConstructor;
@@ -53,6 +56,9 @@ public class BookServiceImpl implements BookService {
     private final PublisherRepository publisherRepository;
     private final ReviewRepository reviewRepository;
     private final BookMapper bookMapper;
+    private final UserRepository userRepository;
+
+    private final NotificationService notificationService;
 
     // ================================ PÚBLICO ===============================================
 
@@ -185,6 +191,8 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Libro no encontrado con id: " + id));
 
+        Integer previousStock = book.getStock();
+
         bookMapper.updateEntity(request, book);
 
         if (request.getPublisherId() != null) {
@@ -197,7 +205,13 @@ public class BookServiceImpl implements BookService {
             book.setCategories(getCategoriesOrThrow(request.getCategoryIds()));
         }
 
-        return bookMapper.toBookResponse(bookRepository.save(book));
+        Book savedBook = bookRepository.save(book);
+
+        if (request.getStock() != null) {
+            notifyStockChanges(savedBook, previousStock, request.getStock());
+        }
+
+        return bookMapper.toBookResponse(savedBook);
     }
 
     // Cambiar el estatus de un libro
@@ -264,6 +278,19 @@ public class BookServiceImpl implements BookService {
     private BookCardResponse toCardResponseWithStats(Book book, Map<Long, double[]> statsMap) {
         double[] stats = getStats(book.getId(), statsMap);
         return bookMapper.toCardResponse(book, stats[0], (long) stats[1]);
+    }
+
+    private void notifyStockChanges(Book book, Integer previousStock, Integer newStock) {
+
+        // Stock agotado → notificar al admin
+        if (newStock == 0) {
+            userRepository.findByRoleAndIsActiveTrue(RoleUser.ADMIN)
+                    .forEach(admin -> notificationService.sendNotification(
+                            admin,
+                            "Stock agotado",
+                            "El libro \"" + book.getTitle() + "\" se ha quedado sin stock."));
+        }
+
     }
 
 }

@@ -26,6 +26,7 @@ import com.lumibooks.backend.repository.BookRepository;
 import com.lumibooks.backend.repository.OrderRepository;
 import com.lumibooks.backend.repository.ReviewRepository;
 import com.lumibooks.backend.security.AuthenticatedUserProvider;
+import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.service.ReviewService;
 import com.lumibooks.backend.specification.ReviewSpecification;
 
@@ -41,6 +42,8 @@ public class ReviewServiceImpl implements ReviewService {
     private final OrderRepository orderRepository;
     private final ReviewMapper reviewMapper;
     private final AuthenticatedUserProvider authenticatedUserProvider;
+
+    private final NotificationService notificationService;
 
     // ===================== PUBLICO =============================================
 
@@ -160,6 +163,18 @@ public class ReviewServiceImpl implements ReviewService {
         Review review = findReviewOrThrow(reviewId);
         review.setStatus(request.getStatus());
         reviewRepository.save(review);
+
+        if (request.getStatus() == ReviewStatus.OCULTA) {
+            notificationService.sendNotification(
+                    review.getUser(),
+                    "Tu reseña fue ocultada",
+                    "Tu reseña del libro \"" + review.getBook().getTitle() + "\" fue ocultada por el administrador.");
+        } else if (request.getStatus() == ReviewStatus.MODERADA) {
+            notificationService.sendNotification(
+                    review.getUser(),
+                    "Tu reseña fue aprobada",
+                    "Tu reseña del libro \"" + review.getBook().getTitle() + "\" fue revisada y aprobada.");
+        }
     }
 
     // ========================= Helpers privados ================================
