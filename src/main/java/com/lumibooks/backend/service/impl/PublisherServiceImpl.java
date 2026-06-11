@@ -8,9 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.lumibooks.backend.dto.request.PublisherRequest;
 import com.lumibooks.backend.dto.response.PublisherResponse;
 import com.lumibooks.backend.entity.Publisher;
+import com.lumibooks.backend.enums.ActionType;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.repository.PublisherRepository;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.PublisherService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,8 @@ public class PublisherServiceImpl implements PublisherService {
 
     private final PublisherRepository publisherRepository;
 
+    private final ActionLogService actionLogService;
+
     /**
      * Crea una nueva editorial validando que no exista otra con el mismo nombre.
      *
@@ -35,7 +40,7 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     @Transactional
     public PublisherResponse create(PublisherRequest request) {
-        
+
         if (publisherRepository.existsByNameIgnoreCase(request.getName())) {
             throw new BadRequestException("Ya existe una editorial con ese nombre");
         }
@@ -46,6 +51,8 @@ public class PublisherServiceImpl implements PublisherService {
                 .build();
 
         Publisher saved = publisherRepository.save(publisher);
+        actionLogService.log(ActionType.CREAR, EntityType.PUBLISHER, saved.getId(),
+                "Creó la editorial '" + saved.getName() + "'");
         return mapToResponse(saved);
     }
 
@@ -58,7 +65,7 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     @Transactional(readOnly = true)
     public PublisherResponse getById(Long id) {
-        
+
         Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
 
@@ -76,7 +83,7 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     @Transactional(readOnly = true)
     public Page<PublisherResponse> getAll(String name, Boolean isActive, Pageable pageable) {
-        
+
         Page<Publisher> publishers = publisherRepository.findByFilters(name, isActive, pageable);
         return publishers.map(this::mapToResponse);
     }
@@ -91,18 +98,20 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     @Transactional
     public PublisherResponse update(Long id, PublisherRequest request) {
-        
+
         Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
 
         if (!publisher.getName().equalsIgnoreCase(request.getName()) &&
-            publisherRepository.existsByNameIgnoreCase(request.getName())) {
+                publisherRepository.existsByNameIgnoreCase(request.getName())) {
             throw new BadRequestException("Ya existe una editorial con ese nombre");
         }
 
         publisher.setName(request.getName());
+
         Publisher updated = publisherRepository.save(publisher);
-        
+        actionLogService.log(ActionType.EDITAR, EntityType.PUBLISHER, updated.getId(),
+                "Editó la editorial '" + updated.getName() + "'");
         return mapToResponse(updated);
     }
 
@@ -114,7 +123,7 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     @Transactional
     public void deactivate(Long id) {
-        
+
         Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
 
@@ -124,6 +133,9 @@ public class PublisherServiceImpl implements PublisherService {
 
         publisher.setIsActive(false);
         publisherRepository.save(publisher);
+
+        actionLogService.log(ActionType.CAMBIAR_ESTADO, EntityType.PUBLISHER, publisher.getId(),
+                "Cambió el estado de la editorial '" + publisher.getName() + "' a INACTIVO");
     }
 
     /**
@@ -134,7 +146,7 @@ public class PublisherServiceImpl implements PublisherService {
     @Override
     @Transactional
     public void activate(Long id) {
-        
+
         Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
 
@@ -144,6 +156,9 @@ public class PublisherServiceImpl implements PublisherService {
 
         publisher.setIsActive(true);
         publisherRepository.save(publisher);
+
+        actionLogService.log(ActionType.CAMBIAR_ESTADO, EntityType.PUBLISHER, publisher.getId(),
+                "Cambió el estado de la editorial '" + publisher.getName() + "' a ACTIVO");
     }
 
     /**

@@ -12,11 +12,14 @@ import com.lumibooks.backend.dto.user.request.UserUpdateRequest;
 import com.lumibooks.backend.dto.user.response.UserAdminDetailResponse;
 import com.lumibooks.backend.dto.user.response.UserSummaryResponse;
 import com.lumibooks.backend.entity.User;
+import com.lumibooks.backend.enums.ActionType;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.enums.RoleUser;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.mapper.UserMapper;
 import com.lumibooks.backend.repository.UserRepository;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.service.UserService;
 import com.lumibooks.backend.specification.UserSpecification;
@@ -36,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     private final NotificationService notificationService;
+    private final ActionLogService actionLogService;
 
     // ============ Admin ============
 
@@ -92,6 +96,9 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toEntity(request, encodedPassword);
         User savedUser = userRepository.save(user);
 
+        actionLogService.log(ActionType.CREAR, EntityType.USER, savedUser.getId(),
+                "Creó el usuario '" + savedUser.getFullName() + "' con rol " + savedUser.getRole().name());
+
         notificationService.sendNotification(
                 savedUser,
                 "¡Bienvenido a LumiBooks!",
@@ -109,7 +116,11 @@ public class UserServiceImpl implements UserService {
                         "Usuario no encontrado con id: " + id));
 
         userMapper.updateEntity(request, user);
-        return userMapper.toAdminDetailResponse(userRepository.save(user));
+
+        User saved = userRepository.save(user);
+        actionLogService.log(ActionType.EDITAR, EntityType.USER, saved.getId(),
+                "Editó el usuario '" + saved.getFullName() + "'");
+        return userMapper.toAdminDetailResponse(saved);
     }
 
 }

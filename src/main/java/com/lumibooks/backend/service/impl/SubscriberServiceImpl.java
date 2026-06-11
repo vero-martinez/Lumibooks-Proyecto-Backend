@@ -10,10 +10,13 @@ import com.lumibooks.backend.dto.response.SubscriberDetailResponse;
 import com.lumibooks.backend.dto.response.SubscriberSummaryResponse;
 import com.lumibooks.backend.entity.Subscriber;
 import com.lumibooks.backend.entity.User;
+import com.lumibooks.backend.enums.ActionType;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.repository.SubscriberRepository;
 import com.lumibooks.backend.repository.UserRepository;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.SubscriberService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,8 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     private final SubscriberRepository subscriberRepository;
     private final UserRepository userRepository;
+
+    private final ActionLogService actionLogService;
 
     /**
      * Suscribe a un usuario a la newsletter al momento de registrarse.
@@ -60,7 +65,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     /**
      * Suscribe a un usuario a la newsletter desde la landing page.
-     * Verifica que el email no esté ya suscrito. Si el email ya existe 
+     * Verifica que el email no esté ya suscrito. Si el email ya existe
      * como suscriptor sin usuario asociado, lanza una excepción indicando que el email ya está suscrito.
      * Si el email no existe, crea una nueva suscripción con el email proporcionado.
       * @param subscribeRequest Contiene el email del usuario que desea suscribirse a la newsletter.
@@ -104,7 +109,7 @@ public class SubscriberServiceImpl implements SubscriberService {
                         .isUser(subscriber.getUser() != null)
                         .build());
     }
-    
+
     /**
      * Obtiene los detalles de un suscriptor por su ID.
      * @param id identificador del suscriptor
@@ -133,7 +138,7 @@ public class SubscriberServiceImpl implements SubscriberService {
                 .cellphone(user != null ? user.getCellphone() : null)
                 .build();
     }
-    
+
     /**
      * Alterna el estado de suscripción de un suscriptor.
      * Si el suscriptor está activo, lo desactiva. Si está inactivo, lo activa.
@@ -148,5 +153,9 @@ public class SubscriberServiceImpl implements SubscriberService {
 
         subscriber.setIsActive(!subscriber.getIsActive());
         subscriberRepository.save(subscriber);
+
+        actionLogService.log(ActionType.CAMBIAR_ESTADO, EntityType.SUBSCRIBER, subscriber.getId(),
+                "Cambió el estado del suscriptor '" + subscriber.getEmail() + "' a "
+                        + (subscriber.getIsActive() ? "ACTIVO" : "INACTIVO"));
     }
 }

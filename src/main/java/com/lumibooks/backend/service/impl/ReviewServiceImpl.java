@@ -17,6 +17,8 @@ import com.lumibooks.backend.dto.review.response.ReviewSummaryResponse;
 import com.lumibooks.backend.entity.Book;
 import com.lumibooks.backend.entity.Review;
 import com.lumibooks.backend.entity.User;
+import com.lumibooks.backend.enums.ActionType;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.enums.OrderStatus;
 import com.lumibooks.backend.enums.ReviewStatus;
 import com.lumibooks.backend.exception.BadRequestException;
@@ -26,6 +28,7 @@ import com.lumibooks.backend.repository.BookRepository;
 import com.lumibooks.backend.repository.OrderRepository;
 import com.lumibooks.backend.repository.ReviewRepository;
 import com.lumibooks.backend.security.AuthenticatedUserProvider;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.service.ReviewService;
 import com.lumibooks.backend.specification.ReviewSpecification;
@@ -44,6 +47,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final AuthenticatedUserProvider authenticatedUserProvider;
 
     private final NotificationService notificationService;
+    private final ActionLogService actionLogService;
 
     // ===================== PUBLICO =============================================
 
@@ -164,6 +168,10 @@ public class ReviewServiceImpl implements ReviewService {
         review.setStatus(request.getStatus());
         reviewRepository.save(review);
 
+        actionLogService.log(ActionType.CAMBIAR_ESTADO, EntityType.REVIEW, review.getId(),
+                "Cambió el estado de la reseña del libro '" + review.getBook().getTitle()
+                        + "' a " + request.getStatus().name());
+
         if (request.getStatus() == ReviewStatus.OCULTA) {
             notificationService.sendNotification(
                     review.getUser(),
@@ -175,6 +183,7 @@ public class ReviewServiceImpl implements ReviewService {
                     "Tu reseña fue aprobada",
                     "Tu reseña del libro \"" + review.getBook().getTitle() + "\" fue revisada y aprobada.");
         }
+
     }
 
     // ========================= Helpers privados ================================
