@@ -40,6 +40,7 @@ import com.lumibooks.backend.repository.OrderItemRepository;
 import com.lumibooks.backend.repository.OrderRepository;
 import com.lumibooks.backend.repository.UserRepository;
 import com.lumibooks.backend.security.AuthenticatedUserProvider;
+import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.service.OrderService;
 import com.lumibooks.backend.specification.OrderSpecification;
 
@@ -63,8 +64,10 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final AuthenticatedUserProvider authenticatedUserProvider;
 
+    private final NotificationService notificationService;
+
     // ===================== CLIENTE ===========================================
-    
+
     // ============ Método para obtener el preview del checkout ============
     @Override
     public CheckoutPreviewResponse getCheckoutPreview(Long addressId) {
@@ -241,6 +244,20 @@ public class OrderServiceImpl implements OrderService {
         // Actualizar el estado de la orden
         order.setStatus(request.getStatus());
         orderRepository.save(order);
+
+        if (request.getStatus() == OrderStatus.ENTREGADO) {
+            notificationService.sendNotification(
+                    order.getUser(),
+                    "¡Tu orden fue entregada!",
+                    "Tu orden " + order.getOrderNumber()
+                            + " ha sido entregada. Ya puedes dejar una reseña de tus libros.");
+        } else {
+            notificationService.sendNotification(
+                    order.getUser(),
+                    "Estado de tu orden actualizado",
+                    "Tu orden " + order.getOrderNumber() + " ahora está en estado: "
+                            + request.getStatus().getDisplayName());
+        }
     }
 
     // ====================== ADMIN ===========================================
@@ -316,6 +333,11 @@ public class OrderServiceImpl implements OrderService {
         // Actualizar el gestor asignado a la orden
         order.setAssignedManager(manager);
         orderRepository.save(order);
+
+        notificationService.sendNotification(
+                manager,
+                "Nuevo pedido asignado",
+                "El administrador te ha asignado el pedido " + order.getOrderNumber());
     }
 
     // ============ HELPERS PRIVADOS ===========================================
