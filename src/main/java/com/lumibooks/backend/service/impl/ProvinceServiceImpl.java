@@ -17,12 +17,15 @@ import com.lumibooks.backend.dto.province.response.ProvinceSummaryResponse;
 import com.lumibooks.backend.entity.Department;
 import com.lumibooks.backend.entity.District;
 import com.lumibooks.backend.entity.Province;
+import com.lumibooks.backend.enums.ActionType;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.mapper.ProvinceMapper;
 import com.lumibooks.backend.repository.DepartmentRepository;
 import com.lumibooks.backend.repository.DistrictRepository;
 import com.lumibooks.backend.repository.ProvinceRepository;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.ProvinceService;
 import com.lumibooks.backend.specification.ProvinceSpecification;
 
@@ -40,6 +43,8 @@ public class ProvinceServiceImpl implements ProvinceService {
     private final DepartmentRepository departmentRepository;
     private final DistrictRepository districtRepository;
     private final ProvinceMapper provinceMapper;
+
+    private final ActionLogService actionLogService;
 
     // ============ Público ============
 
@@ -94,7 +99,11 @@ public class ProvinceServiceImpl implements ProvinceService {
         }
 
         Province province = provinceMapper.toEntity(request, department);
-        return provinceMapper.toSummaryResponse(provinceRepository.save(province));
+
+        Province saved = provinceRepository.save(province);
+        actionLogService.log(ActionType.CREAR, EntityType.PROVINCE, saved.getId(),
+                "Creó la provincia '" + saved.getName() + "'");
+        return provinceMapper.toSummaryResponse(saved);
     }
 
     @Override
@@ -109,7 +118,11 @@ public class ProvinceServiceImpl implements ProvinceService {
         }
 
         provinceMapper.updateEntity(province, request);
-        return provinceMapper.toSummaryResponse(provinceRepository.save(province));
+
+        Province saved = provinceRepository.save(province);
+        actionLogService.log(ActionType.EDITAR, EntityType.PROVINCE, saved.getId(),
+                "Editó la provincia '" + saved.getName() + "'");
+        return provinceMapper.toSummaryResponse(saved);
     }
 
     // ============ Helpers privados ============

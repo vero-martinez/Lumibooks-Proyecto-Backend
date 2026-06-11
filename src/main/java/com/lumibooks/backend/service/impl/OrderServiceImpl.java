@@ -27,6 +27,8 @@ import com.lumibooks.backend.entity.CartItem;
 import com.lumibooks.backend.entity.Order;
 import com.lumibooks.backend.entity.OrderItem;
 import com.lumibooks.backend.entity.User;
+import com.lumibooks.backend.enums.ActionType;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.enums.OrderStatus;
 import com.lumibooks.backend.enums.RoleUser;
 import com.lumibooks.backend.exception.BadRequestException;
@@ -40,6 +42,7 @@ import com.lumibooks.backend.repository.OrderItemRepository;
 import com.lumibooks.backend.repository.OrderRepository;
 import com.lumibooks.backend.repository.UserRepository;
 import com.lumibooks.backend.security.AuthenticatedUserProvider;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.service.OrderService;
 import com.lumibooks.backend.specification.OrderSpecification;
@@ -65,6 +68,7 @@ public class OrderServiceImpl implements OrderService {
     private final AuthenticatedUserProvider authenticatedUserProvider;
 
     private final NotificationService notificationService;
+    private final ActionLogService actionLogService;
 
     // ===================== CLIENTE ===========================================
 
@@ -245,6 +249,13 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(request.getStatus());
         orderRepository.save(order);
 
+        actionLogService.log(
+                ActionType.CAMBIAR_ESTADO,
+                EntityType.ORDER,
+                order.getId(),
+                "Cambió el estado de la orden '" + order.getOrderNumber() + "' a "
+                        + request.getStatus().getDisplayName());
+
         if (request.getStatus() == OrderStatus.ENTREGADO) {
             notificationService.sendNotification(
                     order.getUser(),
@@ -333,6 +344,13 @@ public class OrderServiceImpl implements OrderService {
         // Actualizar el gestor asignado a la orden
         order.setAssignedManager(manager);
         orderRepository.save(order);
+
+        actionLogService.log(
+                ActionType.ASIGNAR,
+                EntityType.ORDER,
+                order.getId(),
+                "Reasignó la orden '" + order.getOrderNumber() + "' al gestor '"
+                        + manager.getFullName() + "'");
 
         notificationService.sendNotification(
                 manager,

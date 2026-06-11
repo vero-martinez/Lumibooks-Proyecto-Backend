@@ -23,8 +23,10 @@ import com.lumibooks.backend.entity.Author;
 import com.lumibooks.backend.entity.Book;
 import com.lumibooks.backend.entity.Category;
 import com.lumibooks.backend.entity.Publisher;
+import com.lumibooks.backend.enums.ActionType;
 import com.lumibooks.backend.enums.BookFormat;
 import com.lumibooks.backend.enums.BookLanguage;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.enums.ReviewStatus;
 import com.lumibooks.backend.enums.RoleUser;
 import com.lumibooks.backend.exception.BadRequestException;
@@ -36,6 +38,7 @@ import com.lumibooks.backend.repository.CategoryRepository;
 import com.lumibooks.backend.repository.PublisherRepository;
 import com.lumibooks.backend.repository.ReviewRepository;
 import com.lumibooks.backend.repository.UserRepository;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.BookService;
 import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.specification.BookSpecification;
@@ -59,6 +62,7 @@ public class BookServiceImpl implements BookService {
     private final UserRepository userRepository;
 
     private final NotificationService notificationService;
+    private final ActionLogService actionLogService;
 
     // ================================ PÚBLICO ===============================================
 
@@ -180,7 +184,15 @@ public class BookServiceImpl implements BookService {
         book.setAuthors(getAuthorsOrThrow(request.getAuthorIds()));
         book.setCategories(getCategoriesOrThrow(request.getCategoryIds()));
 
-        return bookMapper.toBookResponse(bookRepository.save(book));
+        Book saved = bookRepository.save(book);
+
+        actionLogService.log(
+                ActionType.CREAR,
+                EntityType.BOOK,
+                saved.getId(),
+                "Creó el libro '" + saved.getTitle() + "'");
+        return bookMapper.toBookResponse(saved);
+
     }
 
     // Editar un libro
@@ -210,8 +222,13 @@ public class BookServiceImpl implements BookService {
         if (request.getStock() != null) {
             notifyStockChanges(savedBook, previousStock, request.getStock());
         }
-
+        actionLogService.log(
+                ActionType.EDITAR,
+                EntityType.BOOK,
+                savedBook.getId(),
+                "Editó el libro '" + savedBook.getTitle() + "'");
         return bookMapper.toBookResponse(savedBook);
+
     }
 
     // Cambiar el estatus de un libro
@@ -223,6 +240,13 @@ public class BookServiceImpl implements BookService {
                         "Libro no encontrado con id: " + id));
         book.setActive(!book.isActive());
         bookRepository.save(book);
+
+        actionLogService.log(
+                ActionType.CAMBIAR_ESTADO,
+                EntityType.BOOK,
+                book.getId(),
+                "Cambió el estado del libro '" + book.getTitle() + "' a "
+                        + (book.isActive() ? "ACTIVO" : "INACTIVO"));
     }
 
     // ======================= HELPERS PRIVADOS ==============================================

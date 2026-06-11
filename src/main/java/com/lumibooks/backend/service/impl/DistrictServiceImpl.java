@@ -16,11 +16,14 @@ import com.lumibooks.backend.dto.district.response.DistrictPublicResponse;
 import com.lumibooks.backend.dto.district.response.DistrictSummaryResponse;
 import com.lumibooks.backend.entity.District;
 import com.lumibooks.backend.entity.Province;
+import com.lumibooks.backend.enums.ActionType;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.mapper.DistrictMapper;
 import com.lumibooks.backend.repository.DistrictRepository;
 import com.lumibooks.backend.repository.ProvinceRepository;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.DistrictService;
 import com.lumibooks.backend.specification.DistrictSpecification;
 
@@ -37,6 +40,8 @@ public class DistrictServiceImpl implements DistrictService {
     private final DistrictRepository districtRepository;
     private final ProvinceRepository provinceRepository;
     private final DistrictMapper districtMapper;
+
+    private final ActionLogService actionLogService;
 
     // ============ Público ============
 
@@ -99,7 +104,11 @@ public class DistrictServiceImpl implements DistrictService {
         }
 
         District district = districtMapper.toEntity(request, province);
-        return districtMapper.toSummaryResponse(districtRepository.save(district));
+
+        District saved = districtRepository.save(district);
+        actionLogService.log(ActionType.CREAR, EntityType.DISTRICT, saved.getId(),
+                "Creó el distrito '" + saved.getName() + "'");
+        return districtMapper.toSummaryResponse(saved);
     }
 
     @Override
@@ -130,7 +139,11 @@ public class DistrictServiceImpl implements DistrictService {
         }
 
         districtMapper.updateEntity(district, request);
-        return districtMapper.toSummaryResponse(districtRepository.save(district));
+
+        District saved = districtRepository.save(district);
+        actionLogService.log(ActionType.EDITAR, EntityType.DISTRICT, saved.getId(),
+                "Editó el distrito '" + saved.getName() + "'");
+        return districtMapper.toSummaryResponse(saved);
     }
 
     // ============ Helpers privados ============

@@ -14,10 +14,13 @@ import com.lumibooks.backend.dto.banner.response.BannerAdminDetailResponse;
 import com.lumibooks.backend.dto.banner.response.BannerPublicResponse;
 import com.lumibooks.backend.dto.banner.response.BannerSummaryResponse;
 import com.lumibooks.backend.entity.Banner;
+import com.lumibooks.backend.enums.ActionType;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.mapper.BannerMapper;
 import com.lumibooks.backend.repository.BannerRepository;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.BannerService;
 import com.lumibooks.backend.specification.BannerSpecification;
 
@@ -33,6 +36,8 @@ public class BannerServiceImpl implements BannerService {
 
     private final BannerRepository bannerRepository;
     private final BannerMapper bannerMapper;
+
+    private final ActionLogService actionLogService;
 
     // ============ Público ============
 
@@ -69,14 +74,22 @@ public class BannerServiceImpl implements BannerService {
         Banner banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Banner no encontrado con id: " + id));
-        return bannerMapper.toAdminDetailResponse(banner); 
+        return bannerMapper.toAdminDetailResponse(banner);
     }
 
     @Override
     @Transactional
     public BannerAdminDetailResponse createBanner(BannerCreateRequest request) {
         Banner banner = bannerMapper.toEntity(request); // Convertir el DTO de solicitud a una entidad Banner
-        return bannerMapper.toAdminDetailResponse(bannerRepository.save(banner));
+
+        Banner saved = bannerRepository.save(banner);
+
+        actionLogService.log(
+                ActionType.CREAR,
+                EntityType.BANNER,
+                saved.getId(),
+                "Creó el banner '" + saved.getTitle() + "'");
+        return bannerMapper.toAdminDetailResponse(saved);
     }
 
     @Override
@@ -85,7 +98,7 @@ public class BannerServiceImpl implements BannerService {
         Banner banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Banner no encontrado con id: " + id));
-        
+
         
         boolean seEstaActivando = Boolean.TRUE.equals(request.getIsActive()) && !banner.isActive();
         boolean cambiandoOrden = request.getDisplayOrder() != null
@@ -109,7 +122,15 @@ public class BannerServiceImpl implements BannerService {
         }
 
         bannerMapper.updateEntity(banner, request);
-        return bannerMapper.toAdminDetailResponse(bannerRepository.save(banner));
+
+        Banner saved = bannerRepository.save(banner);
+
+        actionLogService.log(
+                ActionType.EDITAR,
+                EntityType.BANNER,
+                saved.getId(),
+                "Editó el banner '" + saved.getTitle() + "'");
+        return bannerMapper.toAdminDetailResponse(saved);
     }
 
     @Override
@@ -125,6 +146,12 @@ public class BannerServiceImpl implements BannerService {
         }
 
         bannerRepository.delete(banner);
+
+        actionLogService.log(
+                ActionType.ELIMINAR,
+                EntityType.BANNER,
+                banner.getId(),
+                "Eliminó el banner '" + banner.getTitle() + "'");
     }
 
 }
