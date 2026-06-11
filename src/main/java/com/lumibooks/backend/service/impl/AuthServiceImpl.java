@@ -16,6 +16,7 @@ import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.repository.UserRepository;
 import com.lumibooks.backend.security.JwtTokenProvider;
 import com.lumibooks.backend.service.AuthService;
+import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.service.SubscriberService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,8 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final SubscriberService subscriberService;
+
+    private final NotificationService notificationService;
 
     /**
      * Registra un nuevo usuario en el sistema.
@@ -70,7 +73,13 @@ public class AuthServiceImpl implements AuthService {
         // Suscribe al newsletter si el usuario lo solicitó
         if (Boolean.TRUE.equals(registerRequest.getSubscribedToNewsletter())) {
             subscriberService.subscribeFromRegister(savedUser);
-        }   
+        }
+
+        notificationService.sendNotification(
+                savedUser,
+                "¡Bienvenido a LumiBooks!",
+                "Hola " + savedUser.getFullName()
+                        + ", gracias por unirte a LumiBooks. ¡Esperamos que disfrutes tu experiencia!");
 
         // Genera el token JWT del usuario registrado
         String token = jwtTokenProvider.generateToken(savedUser.getEmail());
