@@ -8,9 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.lumibooks.backend.dto.request.CategoryRequest;
 import com.lumibooks.backend.dto.response.CategoryResponse;
 import com.lumibooks.backend.entity.Category;
+import com.lumibooks.backend.enums.ActionType;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.repository.CategoryRepository;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.CategoryService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    private final ActionLogService actionLogService;
+
     /**
      * Crea una nueva categoría validando que no exista otra con el mismo nombre.
      *
@@ -35,7 +40,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryResponse create(CategoryRequest request) {
-        
+
         if (categoryRepository.existsByNameIgnoreCase(request.getName())) {
             throw new BadRequestException("Ya existe una categoría con ese nombre");
         }
@@ -46,6 +51,11 @@ public class CategoryServiceImpl implements CategoryService {
                 .build();
 
         Category saved = categoryRepository.save(category);
+        actionLogService.log(
+                ActionType.CREAR,
+                EntityType.CATEGORY,
+                saved.getId(),
+                "Creó la categoría '" + saved.getName() + "'");
         return mapToResponse(saved);
     }
 
@@ -58,7 +68,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public CategoryResponse getById(Long id) {
-        
+
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
@@ -76,7 +86,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public Page<CategoryResponse> getAll(String name, Boolean isActive, Pageable pageable) {
-        
+
         Page<Category> categories = categoryRepository.findByFilters(name, isActive, pageable);
         return categories.map(this::mapToResponse);
     }
@@ -91,18 +101,23 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryResponse update(Long id, CategoryRequest request) {
-        
+
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
         if (!category.getName().equalsIgnoreCase(request.getName()) &&
-            categoryRepository.existsByNameIgnoreCase(request.getName())) {
+                categoryRepository.existsByNameIgnoreCase(request.getName())) {
             throw new BadRequestException("Ya existe una categoría con ese nombre");
         }
 
         category.setName(request.getName());
         Category updated = categoryRepository.save(category);
-        
+
+        actionLogService.log(
+                ActionType.EDITAR,
+                EntityType.CATEGORY,
+                updated.getId(),
+                "Editó la categoría '" + updated.getName() + "'");
         return mapToResponse(updated);
     }
 
@@ -114,7 +129,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void deactivate(Long id) {
-        
+
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
@@ -124,6 +139,12 @@ public class CategoryServiceImpl implements CategoryService {
 
         category.setIsActive(false);
         categoryRepository.save(category);
+
+        actionLogService.log(
+                ActionType.CAMBIAR_ESTADO,
+                EntityType.CATEGORY,
+                category.getId(),
+                "Cambió el estado de la categoría '" + category.getName() + "' a INACTIVO");
     }
 
     /**
@@ -134,7 +155,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void activate(Long id) {
-        
+
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
@@ -144,6 +165,12 @@ public class CategoryServiceImpl implements CategoryService {
 
         category.setIsActive(true);
         categoryRepository.save(category);
+
+        actionLogService.log(
+                ActionType.CAMBIAR_ESTADO,
+                EntityType.CATEGORY,
+                category.getId(),
+                "Cambió el estado de la categoría '" + category.getName() + "' a ACTIVO");
     }
 
     /**
