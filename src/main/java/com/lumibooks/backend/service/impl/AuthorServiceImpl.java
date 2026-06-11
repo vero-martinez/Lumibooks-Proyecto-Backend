@@ -10,9 +10,12 @@ import com.lumibooks.backend.dto.response.AuthorAdminResponse;
 import com.lumibooks.backend.dto.response.AuthorPublicResponse;
 import com.lumibooks.backend.dto.response.AuthorSummaryResponse;
 import com.lumibooks.backend.entity.Author;
+import com.lumibooks.backend.enums.ActionType;
+import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.repository.AuthorRepository;
+import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.AuthorService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,8 @@ import lombok.RequiredArgsConstructor;
 public class AuthorServiceImpl implements AuthorService {
 
     private final AuthorRepository authorRepository;
+
+    private final ActionLogService actionLogService;
 
     /**
      * Obtiene una página de autores con filtros opcionales de nombre y estado activo/inactivo.
@@ -91,10 +96,16 @@ public class AuthorServiceImpl implements AuthorService {
                 .isActive(true)
                 .build();
 
-        return toAdminResponse(authorRepository.save(author));
+        Author saved = authorRepository.save(author);
+        actionLogService.log(
+                ActionType.CREAR,
+                EntityType.AUTHOR,
+                saved.getId(),
+                "Creó el autor '" + saved.getFirstName() + " " + saved.getLastName() + "'");
+        return toAdminResponse(saved);
     }
 
-     /**
+    /**
      * Actualiza los datos de un autor existente.
      * Valida que no exista otro autor con el mismo nombre y apellido antes de realizar la actualización.
      * Los cambios realizados se guardan y el resultado se mapea a AuthorAdminResponse.
@@ -120,7 +131,13 @@ public class AuthorServiceImpl implements AuthorService {
         author.setBiography(authorRequest.getBiography());
         author.setProfileImageUrl(authorRequest.getProfileImageUrl());
 
-        return toAdminResponse(authorRepository.save(author));
+        Author saved = authorRepository.save(author);
+        actionLogService.log(
+                ActionType.EDITAR,
+                EntityType.AUTHOR,
+                saved.getId(),
+                "Editó el autor '" + saved.getFirstName() + " " + saved.getLastName() + "'");
+        return toAdminResponse(saved);
     }
 
     /**
@@ -137,6 +154,12 @@ public class AuthorServiceImpl implements AuthorService {
 
         author.setIsActive(!author.getIsActive());
         authorRepository.save(author);
+        actionLogService.log(
+                ActionType.CAMBIAR_ESTADO,
+                EntityType.AUTHOR,
+                author.getId(),
+                "Cambió el estado del autor '" + author.getFirstName() + " " + author.getLastName() + "' a "
+                        + (author.getIsActive() ? "ACTIVO" : "INACTIVO"));
     }
 
     /**
