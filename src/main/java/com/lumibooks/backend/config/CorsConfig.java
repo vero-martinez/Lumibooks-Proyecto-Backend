@@ -31,7 +31,7 @@ public class CorsConfig {
 
         // Permitir peticiones desde el frontend
         configuration.setAllowedOrigins(
-                java.util.List.of("http://localhost:5173")
+                java.util.List.of("http://localhost:3000")
         );
 
         // Permitir métodos HTTP específicos
