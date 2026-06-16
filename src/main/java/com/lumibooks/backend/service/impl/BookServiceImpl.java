@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.lumibooks.backend.dto.cloudinary.ImageUploadResponse;
 import com.lumibooks.backend.dto.request.BookCreateRequest;
 import com.lumibooks.backend.dto.request.BookUpdateRequest;
 import com.lumibooks.backend.dto.response.BookAdminDetailResponse;
@@ -40,6 +41,7 @@ import com.lumibooks.backend.repository.ReviewRepository;
 import com.lumibooks.backend.repository.UserRepository;
 import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.BookService;
+import com.lumibooks.backend.service.CloudinaryService;
 import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.specification.BookSpecification;
 
@@ -63,8 +65,10 @@ public class BookServiceImpl implements BookService {
 
     private final NotificationService notificationService;
     private final ActionLogService actionLogService;
+    private final CloudinaryService cloudinaryService;
 
-    // ================================ PÚBLICO ===============================================
+    // ================================ PÚBLICO
+    // ===============================================
 
     // Obtener los 10 libros creados recientemente
     @Override
@@ -137,7 +141,8 @@ public class BookServiceImpl implements BookService {
         return bookMapper.toDetailResponse(book, stats[0], (long) stats[1]);
     }
 
-    // ================================ ADMIN =================================================
+    // ================================ ADMIN
+    // =================================================
 
     // Obtener todos los libros en la tabla de admin
     @Override
@@ -179,7 +184,13 @@ public class BookServiceImpl implements BookService {
     public BookResponse createBook(BookCreateRequest request) {
         validateIsbnNotExists(request.getIsbn());
 
+        // Subir imagen a Cloudinary
+        ImageUploadResponse imageResponse = cloudinaryService.uploadImage(
+                request.getCoverImage(), "lumibooks/books");
+
         Book book = bookMapper.toEntity(request);
+        book.setCoverImageUrl(imageResponse.getSecureUrl());
+        book.setCoverImagePublicId(imageResponse.getPublicId());
         book.setPublisher(getPublisherOrThrow(request.getPublisherId()));
         book.setAuthors(getAuthorsOrThrow(request.getAuthorIds()));
         book.setCategories(getCategoriesOrThrow(request.getCategoryIds()));
@@ -204,6 +215,14 @@ public class BookServiceImpl implements BookService {
                         "Libro no encontrado con id: " + id));
 
         Integer previousStock = book.getStock();
+
+        // Reemplazar imagen si viene una nueva
+        if (request.getCoverImage() != null && !request.getCoverImage().isEmpty()) {
+            ImageUploadResponse imageResponse = cloudinaryService.replaceImage(
+                    book.getCoverImagePublicId(), request.getCoverImage(), "lumibooks/books");
+            book.setCoverImageUrl(imageResponse.getSecureUrl());
+            book.setCoverImagePublicId(imageResponse.getPublicId());
+        }
 
         bookMapper.updateEntity(request, book);
 
@@ -249,7 +268,8 @@ public class BookServiceImpl implements BookService {
                         + (book.isActive() ? "ACTIVO" : "INACTIVO"));
     }
 
-    // ======================= HELPERS PRIVADOS ==============================================
+    // ======================= HELPERS PRIVADOS
+    // ==============================================
 
     // Valida que no exista otro libro con el mismo ISBN.
     private void validateIsbnNotExists(String isbn) {
@@ -298,7 +318,8 @@ public class BookServiceImpl implements BookService {
         return statsMap.getOrDefault(bookId, new double[] { 0.0, 0 });
     }
 
-    // Convierte un libro a su respuesta de tarjeta incluyendo estadísticas de calificación.
+    // Convierte un libro a su respuesta de tarjeta incluyendo estadísticas de
+    // calificación.
     private BookCardResponse toCardResponseWithStats(Book book, Map<Long, double[]> statsMap) {
         double[] stats = getStats(book.getId(), statsMap);
         return bookMapper.toCardResponse(book, stats[0], (long) stats[1]);
