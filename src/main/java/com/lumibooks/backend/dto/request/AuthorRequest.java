@@ -31,6 +31,4 @@ public class AuthorRequest {
 
     private String biography;
 
-    private String profileImageUrl;
-
 }
