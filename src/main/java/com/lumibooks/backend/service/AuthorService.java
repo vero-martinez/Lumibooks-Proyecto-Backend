@@ -2,6 +2,7 @@ package com.lumibooks.backend.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.lumibooks.backend.dto.request.AuthorRequest;
 import com.lumibooks.backend.dto.response.AuthorAdminResponse;
@@ -38,15 +39,15 @@ public interface AuthorService {
      * @param authorRequest datos del autor a crear
      * @return detalles del autor creado para la vista de administración
      */
-    AuthorAdminResponse createAuthor(AuthorRequest authorRequest);
-
+    AuthorAdminResponse createAuthor(AuthorRequest authorRequest, MultipartFile profileImage);
+    
     /**
      * Actualiza los datos de un autor existente.
      * @param id identificador del autor
      * @param authorRequest datos actualizados del autor
      * @return detalles del autor actualizado para la vista de administración
      */
-    AuthorAdminResponse updateAuthor(Long id, AuthorRequest authorRequest);
+    AuthorAdminResponse updateAuthor(Long id, AuthorRequest authorRequest, MultipartFile profileImage);
 
     /**
      * Alterna el estado de actividad de un autor.
