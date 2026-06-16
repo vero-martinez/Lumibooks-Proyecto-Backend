@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.lumibooks.backend.dto.cloudinary.ImageUploadResponse;
 import com.lumibooks.backend.dto.request.BookCreateRequest;
@@ -181,12 +182,10 @@ public class BookServiceImpl implements BookService {
     // Crear un libro
     @Override
     @Transactional
-    public BookResponse createBook(BookCreateRequest request) {
+    public BookResponse createBook(BookCreateRequest request, MultipartFile coverImage) {
         validateIsbnNotExists(request.getIsbn());
 
-        // Subir imagen a Cloudinary
-        ImageUploadResponse imageResponse = cloudinaryService.uploadImage(
-                request.getCoverImage(), "lumibooks/books");
+        ImageUploadResponse imageResponse = cloudinaryService.uploadImage(coverImage, "lumibooks/books");
 
         Book book = bookMapper.toEntity(request);
         book.setCoverImageUrl(imageResponse.getSecureUrl());
@@ -203,23 +202,21 @@ public class BookServiceImpl implements BookService {
                 saved.getId(),
                 "Creó el libro '" + saved.getTitle() + "'");
         return bookMapper.toBookResponse(saved);
-
     }
 
     // Editar un libro
     @Override
     @Transactional
-    public BookResponse updateBook(Long id, BookUpdateRequest request) {
+    public BookResponse updateBook(Long id, BookUpdateRequest request, MultipartFile coverImage) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Libro no encontrado con id: " + id));
 
         Integer previousStock = book.getStock();
 
-        // Reemplazar imagen si viene una nueva
-        if (request.getCoverImage() != null && !request.getCoverImage().isEmpty()) {
+        if (coverImage != null && !coverImage.isEmpty()) {
             ImageUploadResponse imageResponse = cloudinaryService.replaceImage(
-                    book.getCoverImagePublicId(), request.getCoverImage(), "lumibooks/books");
+                    book.getCoverImagePublicId(), coverImage, "lumibooks/books");
             book.setCoverImageUrl(imageResponse.getSecureUrl());
             book.setCoverImagePublicId(imageResponse.getPublicId());
         }
@@ -247,7 +244,6 @@ public class BookServiceImpl implements BookService {
                 savedBook.getId(),
                 "Editó el libro '" + savedBook.getTitle() + "'");
         return bookMapper.toBookResponse(savedBook);
-
     }
 
     // Cambiar el estatus de un libro
