@@ -25,19 +25,17 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     public ImageUploadResponse uploadImage(MultipartFile file, String folder) {
         try {
             Map<?, ?> result = cloudinary.uploader().upload(
-                file.getBytes(),
-                ObjectUtils.asMap(
-                    "folder", folder,
-                    "resource_type", "auto"
-                )
-            );
+                    file.getBytes(),
+                    ObjectUtils.asMap(
+                            "folder", folder,
+                            "resource_type", "auto"));
             return ImageUploadResponse.builder()
-                .publicId((String) result.get("public_id"))
-                .url((String) result.get("url"))
-                .secureUrl((String) result.get("secure_url"))
-                .format((String) result.get("format"))
-                .bytes(((Number) result.get("bytes")).longValue())
-                .build();
+                    .publicId((String) result.get("public_id"))
+                    .url((String) result.get("url"))
+                    .secureUrl((String) result.get("secure_url"))
+                    .format((String) result.get("format"))
+                    .bytes(((Number) result.get("bytes")).longValue())
+                    .build();
         } catch (IOException e) {
             throw new BadRequestException("Error al subir imagen: " + e.getMessage());
         }
@@ -54,7 +52,9 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
     @Override
     public ImageUploadResponse replaceImage(String oldPublicId, MultipartFile newFile, String folder) {
-        deleteImage(oldPublicId);
+        if (oldPublicId != null && !oldPublicId.isBlank()) {
+            deleteImage(oldPublicId);
+        }
         return uploadImage(newFile, folder);
     }
 }
