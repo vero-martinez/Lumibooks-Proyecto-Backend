@@ -3,8 +3,6 @@ package com.lumibooks.backend.dto.request;
 import java.math.BigDecimal;
 import java.util.Set;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import com.lumibooks.backend.enums.BookFormat;
 import com.lumibooks.backend.enums.BookLanguage;
 
@@ -26,8 +24,6 @@ public class BookUpdateRequest {
 
     @Size(max = 200, message = "El título no puede superar los 200 caracteres")
     private String title;
-
-    private MultipartFile coverImage;
 
     @Size(min = 1, message = "Debe tener al menos un autor")
     private Set<Long> authorIds;
