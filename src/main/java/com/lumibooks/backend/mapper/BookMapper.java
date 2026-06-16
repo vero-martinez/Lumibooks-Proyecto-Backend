@@ -137,7 +137,6 @@ public class BookMapper {
     public Book toEntity(BookCreateRequest request) {
         return Book.builder()
                 .title(request.getTitle())
-                .coverImageUrl(request.getCoverImageUrl())
                 .description(request.getDescription())
                 .isbn(request.getIsbn())
                 .price(request.getPrice())
@@ -151,7 +150,6 @@ public class BookMapper {
 
     public void updateEntity(BookUpdateRequest request, Book book) {
         Optional.ofNullable(request.getTitle()).ifPresent(book::setTitle);
-        Optional.ofNullable(request.getCoverImageUrl()).ifPresent(book::setCoverImageUrl);
         Optional.ofNullable(request.getDescription()).ifPresent(book::setDescription);
         Optional.ofNullable(request.getPrice()).ifPresent(book::setPrice);
         Optional.ofNullable(request.getStock()).ifPresent(book::setStock);
