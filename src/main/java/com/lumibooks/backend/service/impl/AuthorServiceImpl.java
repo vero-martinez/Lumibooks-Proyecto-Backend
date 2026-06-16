@@ -6,8 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.lumibooks.backend.dto.author.request.AuthorCreateRequest;
+import com.lumibooks.backend.dto.author.request.AuthorUpdateRequest;
 import com.lumibooks.backend.dto.cloudinary.ImageUploadResponse;
-import com.lumibooks.backend.dto.request.AuthorRequest;
 import com.lumibooks.backend.dto.response.AuthorAdminResponse;
 import com.lumibooks.backend.dto.response.AuthorPublicResponse;
 import com.lumibooks.backend.dto.response.AuthorSummaryResponse;
@@ -98,7 +99,7 @@ public class AuthorServiceImpl implements AuthorService {
          */
         @Override
         @Transactional
-        public AuthorAdminResponse createAuthor(AuthorRequest authorRequest, MultipartFile profileImage) {
+        public AuthorAdminResponse createAuthor(AuthorCreateRequest authorRequest, MultipartFile profileImage) {
 
                 if (authorRepository.existsByFirstNameIgnoreCaseAndLastNameIgnoreCase(
                                 authorRequest.getFirstName(), authorRequest.getLastName())) {
@@ -141,21 +142,26 @@ public class AuthorServiceImpl implements AuthorService {
          */
         @Override
         @Transactional
-        public AuthorAdminResponse updateAuthor(Long id, AuthorRequest authorRequest, MultipartFile profileImage) {
+        public AuthorAdminResponse updateAuthor(Long id, AuthorUpdateRequest authorRequest,
+                        MultipartFile profileImage) {
                 Author author = authorRepository.findById(id)
                                 .orElseThrow(() -> new ResourceNotFoundException("Autor no encontrado"));
 
-                if (authorRepository.existsByFirstNameIgnoreCaseAndLastNameIgnoreCase(
-                                authorRequest.getFirstName(), authorRequest.getLastName())
+                if (authorRequest.getFirstName() != null && authorRequest.getLastName() != null
+                                && authorRepository.existsByFirstNameIgnoreCaseAndLastNameIgnoreCase(
+                                                authorRequest.getFirstName(), authorRequest.getLastName())
                                 && !(author.getFirstName().equalsIgnoreCase(authorRequest.getFirstName())
                                                 && author.getLastName()
                                                                 .equalsIgnoreCase(authorRequest.getLastName()))) {
                         throw new BadRequestException("Ya existe un autor con ese nombre y apellido");
                 }
 
-                author.setFirstName(authorRequest.getFirstName());
-                author.setLastName(authorRequest.getLastName());
-                author.setBiography(authorRequest.getBiography());
+                if (authorRequest.getFirstName() != null)
+                        author.setFirstName(authorRequest.getFirstName());
+                if (authorRequest.getLastName() != null)
+                        author.setLastName(authorRequest.getLastName());
+                if (authorRequest.getBiography() != null)
+                        author.setBiography(authorRequest.getBiography());
 
                 if (profileImage != null && !profileImage.isEmpty()) {
                         ImageUploadResponse imageResponse = cloudinaryService.replaceImage(
