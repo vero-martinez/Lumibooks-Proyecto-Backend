@@ -22,9 +22,6 @@ public class BannerUpdateRequest {
     @Size(max = 150, message = "El título no puede superar los 150 caracteres")
     private String title;
 
-    @URL(message = "La URL de la imagen debe ser válida")
-    private String imageUrl;
-
     @Size(max = 150, message = "El texto del botón no puede superar los 150 caracteres")
     private String buttonText;
 
