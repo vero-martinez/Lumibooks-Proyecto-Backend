@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.lumibooks.backend.dto.banner.request.BannerCreateRequest;
 import com.lumibooks.backend.dto.banner.request.BannerUpdateRequest;
@@ -49,19 +50,23 @@ public class BannerAdminController {
     }
 
     // Endpoint para crear un nuevo banner
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<BannerAdminDetailResponse> createBanner(
-            @RequestBody @Valid BannerCreateRequest request) {
+            @RequestPart("data") @Valid BannerCreateRequest request,
+            @RequestPart("image") MultipartFile image) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(bannerService.createBanner(request));
+                .body(bannerService.createBanner(request, image));
     }
 
     // Endpoint para actualizar un banner existente
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = "multipart/form-data")
     public ResponseEntity<BannerAdminDetailResponse> updateBanner(
             @PathVariable Long id,
-            @RequestBody @Valid BannerUpdateRequest request) {
-        return ResponseEntity.ok(bannerService.updateBanner(id, request));
+            @RequestPart(value = "data", required = false) @Valid BannerUpdateRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        if (request == null)
+            request = new BannerUpdateRequest();
+        return ResponseEntity.ok(bannerService.updateBanner(id, request, image));
     }
 
     // Endpoint para eliminar un banner
