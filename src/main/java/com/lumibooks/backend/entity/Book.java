@@ -82,6 +82,9 @@ public class Book {
     @Column(name = "cover_image_url", nullable = false, columnDefinition = "TEXT")
     private String coverImageUrl;
 
+    @Column(name = "cover_image_public_id", columnDefinition = "TEXT")
+    private String coverImagePublicId;
+
     @Column(name = "edition_year")
     private Short editionYear;
 

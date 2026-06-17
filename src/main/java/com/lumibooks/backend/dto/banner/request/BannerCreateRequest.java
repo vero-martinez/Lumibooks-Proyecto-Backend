@@ -25,10 +25,6 @@ public class BannerCreateRequest {
     @Size(max = 150, message = "El título no puede superar los 150 caracteres")
     private String title;
 
-    @NotBlank(message = "La imagen es obligatoria")
-    @URL(message = "La URL de la imagen debe ser válida")
-    private String imageUrl;
-
     @NotBlank(message = "El texto del botón es obligatorio")
     @Size(max = 150, message = "El texto del botón no puede superar los 150 caracteres")
     private String buttonText;

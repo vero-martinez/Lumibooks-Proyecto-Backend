@@ -42,6 +42,9 @@ public class Author {
     @Column(name = "profile_image_url", columnDefinition = "TEXT")
     private String profileImageUrl;
 
+    @Column(name = "profile_image_public_id", columnDefinition = "TEXT")
+    private String profileImagePublicId;
+
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;

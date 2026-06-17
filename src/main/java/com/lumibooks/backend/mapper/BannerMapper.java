@@ -11,13 +11,10 @@ import com.lumibooks.backend.dto.banner.response.BannerPublicResponse;
 import com.lumibooks.backend.dto.banner.response.BannerSummaryResponse;
 import com.lumibooks.backend.entity.Banner;
 
-import lombok.RequiredArgsConstructor;
-
 /**
  * Mapper encargado de transformar entidades Banner en DTOs de respuesta
  * y convertir DTOs de solicitud en entidades Banner.
  */
-@RequiredArgsConstructor
 @Component
 public class BannerMapper {
 
@@ -63,7 +60,6 @@ public class BannerMapper {
     public Banner toEntity(BannerCreateRequest request){
         return Banner.builder()
                 .title(request.getTitle())
-                .imageUrl(request.getImageUrl())
                 .buttonText(request.getButtonText())
                 .buttonUrl(request.getButtonUrl())
                 .displayOrder(request.getDisplayOrder())
@@ -73,7 +69,6 @@ public class BannerMapper {
 
     public void updateEntity(Banner banner, BannerUpdateRequest request){
         Optional.ofNullable(request.getTitle()).ifPresent(banner::setTitle);
-        Optional.ofNullable(request.getImageUrl()).ifPresent(banner::setImageUrl);
         Optional.ofNullable(request.getButtonText()).ifPresent(banner::setButtonText);
         Optional.ofNullable(request.getButtonUrl()).ifPresent(banner::setButtonUrl);
         Optional.ofNullable(request.getDisplayOrder()).ifPresent(banner::setDisplayOrder);

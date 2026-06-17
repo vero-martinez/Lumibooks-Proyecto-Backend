@@ -9,10 +9,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.lumibooks.backend.dto.request.BookCreateRequest;
 import com.lumibooks.backend.dto.request.BookUpdateRequest;
@@ -72,10 +73,11 @@ public class BookAdminController {
      * @param request datos del libro a crear
      * @return detalle del libro creado con status 201
      */
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<BookResponse> createBook(
-            @RequestBody @Valid BookCreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(bookService.createBook(request));
+            @RequestPart("data") @Valid BookCreateRequest request,
+            @RequestPart("coverImage") MultipartFile coverImage) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookService.createBook(request, coverImage));
     }
 
     /**
@@ -85,11 +87,14 @@ public class BookAdminController {
      * @param request campos a actualizar
      * @return detalle del libro actualizado
      */
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = "multipart/form-data")
     public ResponseEntity<BookResponse> updateBook(
             @PathVariable Long id,
-            @RequestBody @Valid BookUpdateRequest request) {
-        return ResponseEntity.ok(bookService.updateBook(id, request));
+            @RequestPart(value = "data", required = false) @Valid BookUpdateRequest request,
+            @RequestPart(value = "coverImage", required = false) MultipartFile coverImage) {
+        if (request == null)
+            request = new BookUpdateRequest();
+        return ResponseEntity.ok(bookService.updateBook(id, request, coverImage));
     }
 
     /**

@@ -36,6 +36,9 @@ public class Banner {
     @Column(name = "image_url", nullable = false, columnDefinition = "TEXT")
     private String imageUrl;
 
+    @Column(name = "image_public_id", columnDefinition = "TEXT")
+    private String imagePublicId;
+
     @Column(name = "button_text", nullable = false, length = 150)
     private String buttonText;
 

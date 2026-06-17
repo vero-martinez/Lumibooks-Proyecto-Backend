@@ -3,8 +3,6 @@ package com.lumibooks.backend.dto.request;
 import java.math.BigDecimal;
 import java.util.Set;
 
-import org.hibernate.validator.constraints.URL;
-
 import com.lumibooks.backend.enums.BookFormat;
 import com.lumibooks.backend.enums.BookLanguage;
 
@@ -31,11 +29,6 @@ public class BookCreateRequest {
     @NotBlank(message = "El título es obligatorio")
     @Size(max = 200, message = "El título no puede superar los 200 caracteres")
     private String title;
-
-    @NotBlank(message = "La imagen de portada es obligatoria")
-    @Size(max = 1000, message = "La URL de la imagen no puede superar los 1000 caracteres")
-    @URL(message = "La URL de la imagen tiene que ser válida")
-    private String coverImageUrl;
 
     @NotEmpty(message = "El libro debe tener al menos un autor")
     private Set<Long> authorIds;

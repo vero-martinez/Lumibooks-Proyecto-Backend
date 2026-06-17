@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.lumibooks.backend.dto.banner.request.BannerCreateRequest;
 import com.lumibooks.backend.dto.banner.request.BannerUpdateRequest;
@@ -50,7 +51,7 @@ public interface BannerService {
      * @param request datos del banner a crear
      * @return detalle del banner creado
      */
-    BannerAdminDetailResponse createBanner(BannerCreateRequest request);
+    BannerAdminDetailResponse createBanner(BannerCreateRequest request, MultipartFile image);
 
     /**
      * Actualiza un banner existente.
@@ -61,7 +62,7 @@ public interface BannerService {
      * @throws ResourceNotFoundException si el banner no existe
      * @throws BadRequestException si se intenta activar un banner sin especificar displayOrder 
      */
-    BannerAdminDetailResponse updateBanner(Long id, BannerUpdateRequest request);
+    BannerAdminDetailResponse updateBanner(Long id, BannerUpdateRequest request, MultipartFile image);
 
     /**
      * Elimina físicamente un banner.
