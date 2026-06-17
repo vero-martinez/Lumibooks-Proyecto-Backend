@@ -7,12 +7,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.lumibooks.backend.dto.banner.request.BannerCreateRequest;
 import com.lumibooks.backend.dto.banner.request.BannerUpdateRequest;
 import com.lumibooks.backend.dto.banner.response.BannerAdminDetailResponse;
 import com.lumibooks.backend.dto.banner.response.BannerPublicResponse;
 import com.lumibooks.backend.dto.banner.response.BannerSummaryResponse;
+import com.lumibooks.backend.dto.cloudinary.ImageUploadResponse;
 import com.lumibooks.backend.entity.Banner;
 import com.lumibooks.backend.enums.ActionType;
 import com.lumibooks.backend.enums.EntityType;
@@ -22,6 +24,7 @@ import com.lumibooks.backend.mapper.BannerMapper;
 import com.lumibooks.backend.repository.BannerRepository;
 import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.BannerService;
+import com.lumibooks.backend.service.CloudinaryService;
 import com.lumibooks.backend.specification.BannerSpecification;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,7 @@ public class BannerServiceImpl implements BannerService {
     private final BannerMapper bannerMapper;
 
     private final ActionLogService actionLogService;
+    private final CloudinaryService cloudinaryService;
 
     // ============ Público ============
 
@@ -79,8 +83,15 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     @Transactional
-    public BannerAdminDetailResponse createBanner(BannerCreateRequest request) {
-        Banner banner = bannerMapper.toEntity(request); // Convertir el DTO de solicitud a una entidad Banner
+    public BannerAdminDetailResponse createBanner(BannerCreateRequest request, MultipartFile image) {
+
+        if (image == null || image.isEmpty()) {
+            throw new BadRequestException("La imagen del banner es obligatoria");
+        }
+        ImageUploadResponse imageResponse = cloudinaryService.uploadImage(image, "lumibooks/banners");
+        Banner banner = bannerMapper.toEntity(request);
+        banner.setImageUrl(imageResponse.getSecureUrl());
+        banner.setImagePublicId(imageResponse.getPublicId());
 
         Banner saved = bannerRepository.save(banner);
 
@@ -94,12 +105,21 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     @Transactional
-    public BannerAdminDetailResponse updateBanner(Long id, BannerUpdateRequest request) {
+    public BannerAdminDetailResponse updateBanner(Long id, BannerUpdateRequest request, MultipartFile image) {
         Banner banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Banner no encontrado con id: " + id));
 
-        
+        if (image != null && !image.isEmpty()) {
+            ImageUploadResponse imageResponse = cloudinaryService.replaceImage(
+                    banner.getImagePublicId(),
+                    image,
+                    "lumibooks/banners");
+
+            banner.setImageUrl(imageResponse.getSecureUrl());
+            banner.setImagePublicId(imageResponse.getPublicId());
+        }
+
         boolean seEstaActivando = Boolean.TRUE.equals(request.getIsActive()) && !banner.isActive();
         boolean cambiandoOrden = request.getDisplayOrder() != null
                 && !request.getDisplayOrder().equals(banner.getDisplayOrder());
@@ -143,6 +163,11 @@ public class BannerServiceImpl implements BannerService {
         if (banner.isActive()) {
             throw new BadRequestException(
                     "No se puede eliminar un banner activo, desactívalo primero");
+        }
+
+        if (banner.getImagePublicId() != null &&
+                !banner.getImagePublicId().isBlank()) {
+            cloudinaryService.deleteImage(banner.getImagePublicId());
         }
 
         bannerRepository.delete(banner);
