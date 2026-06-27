@@ -7,40 +7,28 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.lumibooks.backend.dto.request.BookCreateRequest;
-import com.lumibooks.backend.dto.request.BookUpdateRequest;
-import com.lumibooks.backend.dto.response.BookAdminDetailResponse;
-import com.lumibooks.backend.dto.response.BookCardResponse;
-import com.lumibooks.backend.dto.response.BookDetailResponse;
-import com.lumibooks.backend.dto.response.BookResponse;
-import com.lumibooks.backend.dto.response.BookSummaryResponse;
+import com.lumibooks.backend.dto.book.request.BookCreateRequest;
+import com.lumibooks.backend.dto.book.request.BookUpdateRequest;
+import com.lumibooks.backend.dto.book.response.BookAdminDetailResponse;
+import com.lumibooks.backend.dto.book.response.BookCardResponse;
+import com.lumibooks.backend.dto.book.response.BookDetailResponse;
+import com.lumibooks.backend.dto.book.response.BookSuggestionResponse;
+import com.lumibooks.backend.dto.book.response.BookSummaryResponse;
+import com.lumibooks.backend.dto.book.response.BookResponse;
 import com.lumibooks.backend.enums.BookFormat;
 import com.lumibooks.backend.enums.BookLanguage;
 
 public interface BookService {
 
-        /**
-         * Obtiene los 10 libros activos más recientes
-         * para mostrar en la página principal.
-         */
+        // Catálogo público
+
+        /** Obtiene los libros más recientes. */
         List<BookCardResponse> getLatestBooks();
 
+        /** Obtiene los libros mejor valorados. */
         List<BookCardResponse> getTopRatedBooks();
 
-        /**
-         * Obtiene una lista paginada de libros públicos
-         * aplicando filtros dinámicos y ordenamiento.
-         *
-         * @param search      búsqueda por título, ISBN o autor
-         * @param categoryId  id de la categoría
-         * @param publisherId id de la editorial
-         * @param language    idioma del libro
-         * @param format      formato del libro
-         * @param minPrice    precio mínimo
-         * @param maxPrice    precio máximo
-         * @param pageable    configuración de paginación y ordenamiento
-         * @return página de libros públicos
-         */
+        /** Lista libros públicos aplicando filtros y paginación. */
         Page<BookCardResponse> getBooks(
                         String search,
                         Long categoryId,
@@ -51,62 +39,33 @@ public interface BookService {
                         BigDecimal maxPrice,
                         Pageable pageable);
 
-        /**
-         * Obtiene el detalle público completo de un libro.
-         *
-         * @param id id del libro
-         * @return detalle del libro
-         */
+        /** Devuelve sugerencias de búsqueda de libros. */
+        List<BookSuggestionResponse> getBookSuggestions(String search);
+
+        /** Obtiene el detalle público de un libro. */
         BookDetailResponse getBookDetail(Long id);
 
-        /**
-         * Obtiene una lista paginada de libros para administración
-         * aplicando filtros dinámicos.
-         *
-         * @param search   búsqueda por título, ISBN o autor
-         * @param isActive estado del libro (activo/inactivo)
-         * @param language idioma del libro
-         * @param pageable configuración de paginación y ordenamiento
-         * @return página de libros para administración
-         */
+        // Administración
+
+        /** Lista libros para el panel de administración. */
         Page<BookSummaryResponse> getBooksAdmin(
                         String search,
                         Boolean isActive,
                         BookLanguage language,
                         Pageable pageable);
 
-        /**
-         * Obtiene el detalle completo de un libro
-         * para el panel de administración.
-         *
-         * @param id id del libro
-         * @return detalle administrativo del libro
-         */
+        /** Obtiene el detalle administrativo de un libro. */
         BookAdminDetailResponse getBookDetailAdmin(Long id);
 
-        /**
-         * Registra un nuevo libro en el sistema.
-         *
-         * @param request datos del libro a crear
-         * @return libro creado
-         */
+        // Gestión de libros
+
+        /** Registra un nuevo libro. */
         BookResponse createBook(BookCreateRequest request, MultipartFile coverImage);
 
-        /**
-         * Actualiza parcialmente la información de un libro.
-         *
-         * @param id      id del libro
-         * @param request datos a actualizar
-         * @return libro actualizado
-         */
+        /** Actualiza la información de un libro. */
         BookResponse updateBook(Long id, BookUpdateRequest request, MultipartFile coverImage);
 
-        /**
-         * Cambia el estado de un libro
-         * entre activo e inactivo.
-         *
-         * @param id id del libro
-         */
+        /** Activa o desactiva un libro. */
         void toggleBookStatus(Long id);
 
 }

@@ -7,20 +7,22 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.lumibooks.backend.dto.book.request.BookCreateRequest;
+import com.lumibooks.backend.dto.book.request.BookUpdateRequest;
+import com.lumibooks.backend.dto.book.response.BookAdminDetailResponse;
+import com.lumibooks.backend.dto.book.response.BookCardResponse;
+import com.lumibooks.backend.dto.book.response.BookDetailResponse;
+import com.lumibooks.backend.dto.book.response.BookSuggestionResponse;
+import com.lumibooks.backend.dto.book.response.BookSummaryResponse;
 import com.lumibooks.backend.dto.cloudinary.ImageUploadResponse;
-import com.lumibooks.backend.dto.request.BookCreateRequest;
-import com.lumibooks.backend.dto.request.BookUpdateRequest;
-import com.lumibooks.backend.dto.response.BookAdminDetailResponse;
-import com.lumibooks.backend.dto.response.BookCardResponse;
-import com.lumibooks.backend.dto.response.BookDetailResponse;
-import com.lumibooks.backend.dto.response.BookResponse;
-import com.lumibooks.backend.dto.response.BookSummaryResponse;
+import com.lumibooks.backend.dto.book.response.BookResponse;
 import com.lumibooks.backend.entity.Author;
 import com.lumibooks.backend.entity.Book;
 import com.lumibooks.backend.entity.Category;
@@ -68,10 +70,9 @@ public class BookServiceImpl implements BookService {
     private final ActionLogService actionLogService;
     private final CloudinaryService cloudinaryService;
 
-    // ================================ PÚBLICO
-    // ===============================================
+    // ===================== Catálogo público =====================
 
-    // Obtener los 10 libros creados recientemente
+    // Obtiene los 10 libros más recientes
     @Override
     public List<BookCardResponse> getLatestBooks() {
         List<Book> books = bookRepository.findTop10ByIsActiveTrueOrderByCreatedAtDesc();
@@ -81,7 +82,7 @@ public class BookServiceImpl implements BookService {
                 .toList();
     }
 
-    // Obtener los 10 libros mejor calificados
+    // Obtiene los 10 libros mejor valorados
     @Override
     public List<BookCardResponse> getTopRatedBooks() {
         List<Long> bookIds = reviewRepository.findTop10BookIdsByAverageRating(ReviewStatus.OCULTA);
@@ -92,7 +93,7 @@ public class BookServiceImpl implements BookService {
                 .toList();
     }
 
-    // Obtener todos los libros para el público
+    // Obtiene la lista de todos los libros aplicando filtros
     @Override
     public Page<BookCardResponse> getBooks(
             String search,
@@ -133,7 +134,26 @@ public class BookServiceImpl implements BookService {
         return books.map(book -> toCardResponseWithStats(book, statsMap));
     }
 
-    // Obtener el detalle completo de un libro para el público
+    // Devuelve sugerencias de búsqueda
+    @Override
+    public List<BookSuggestionResponse> getBookSuggestions(String search) {
+
+        if (search == null || search.trim().length() < 2) {
+            return List.of();
+        }
+
+        Specification<Book> spec = BookSpecification.isActive()
+                .and(BookSpecification.search(search));
+
+        Pageable pageable = PageRequest.of(0, 5);
+
+        return bookRepository.findAll(spec, pageable)
+                .stream()
+                .map(bookMapper::toSuggestionResponse)
+                .toList();
+    }
+
+    // Obtiene el detalle completo de un libro
     @Override
     public BookDetailResponse getBookDetail(Long id) {
         Book book = bookRepository.findByIdAndIsActiveTrue(id)
@@ -142,10 +162,9 @@ public class BookServiceImpl implements BookService {
         return bookMapper.toDetailResponse(book, stats[0], (long) stats[1]);
     }
 
-    // ================================ ADMIN
-    // =================================================
+    // ===================== Administración =======================
 
-    // Obtener todos los libros en la tabla de admin
+    // Obtiene lista de libros para el panel de admin
     @Override
     public Page<BookSummaryResponse> getBooksAdmin(
             String search,
@@ -169,7 +188,7 @@ public class BookServiceImpl implements BookService {
                 .map(bookMapper::toSummaryResponse);
     }
 
-    // Obtener el detalle completo de un libro en admin
+    // Obtener el detalle completo de un libro
     @Override
     public BookAdminDetailResponse getBookDetailAdmin(Long id) {
         Book book = bookRepository.findById(id)
@@ -179,7 +198,9 @@ public class BookServiceImpl implements BookService {
         return bookMapper.toAdminDetailResponse(book, stats[0], (long) stats[1]);
     }
 
-    // Crear un libro
+    // ===================== Gestión de libros ====================
+
+    // Registrar un nuevo libro
     @Override
     @Transactional
     public BookResponse createBook(BookCreateRequest request, MultipartFile coverImage) {
@@ -204,7 +225,7 @@ public class BookServiceImpl implements BookService {
         return bookMapper.toBookResponse(saved);
     }
 
-    // Editar un libro
+    // Actualizar un libro existente
     @Override
     @Transactional
     public BookResponse updateBook(Long id, BookUpdateRequest request, MultipartFile coverImage) {
@@ -246,7 +267,7 @@ public class BookServiceImpl implements BookService {
         return bookMapper.toBookResponse(savedBook);
     }
 
-    // Cambiar el estatus de un libro
+    // Activar o desactivar un libro
     @Override
     @Transactional
     public void toggleBookStatus(Long id) {
@@ -264,17 +285,16 @@ public class BookServiceImpl implements BookService {
                         + (book.isActive() ? "ACTIVO" : "INACTIVO"));
     }
 
-    // ======================= HELPERS PRIVADOS
-    // ==============================================
+    // ===================== Helpers privados =====================
 
-    // Valida que no exista otro libro con el mismo ISBN.
+    // Valida que el ISBN no esté registrado.
     private void validateIsbnNotExists(String isbn) {
         if (bookRepository.existsByIsbn(isbn)) {
             throw new BadRequestException("Ya existe un libro con el ISBN: " + isbn);
         }
     }
 
-    // Obtiene la editorial por su ID o lanza una excepción si no existe.
+    // Obtiene una editorial por su ID o lanza una excepción si no existe.
     private Publisher getPublisherOrThrow(Long publisherId) {
         return publisherRepository.findById(publisherId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -299,7 +319,7 @@ public class BookServiceImpl implements BookService {
         return categories;
     }
 
-    // Obtiene las estadísticas de calificación de los libros indicados.
+    // Obtiene las estadísticas de calificación de varios libros.
     private Map<Long, double[]> getRatingStatsMap(List<Long> bookIds) {
         return reviewRepository
                 .findRatingStatsByBookIds(bookIds, ReviewStatus.OCULTA)
@@ -314,13 +334,13 @@ public class BookServiceImpl implements BookService {
         return statsMap.getOrDefault(bookId, new double[] { 0.0, 0 });
     }
 
-    // Convierte un libro a su respuesta de tarjeta incluyendo estadísticas de
-    // calificación.
+    // Convierte un libro a una tarjeta con estadísticas
     private BookCardResponse toCardResponseWithStats(Book book, Map<Long, double[]> statsMap) {
         double[] stats = getStats(book.getId(), statsMap);
         return bookMapper.toCardResponse(book, stats[0], (long) stats[1]);
     }
 
+    // Envía notificaciones por cambios de stock
     private void notifyStockChanges(Book book, Integer previousStock, Integer newStock) {
 
         // Stock agotado → notificar al admin

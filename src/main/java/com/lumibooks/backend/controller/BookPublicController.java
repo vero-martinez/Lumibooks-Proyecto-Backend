@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lumibooks.backend.dto.response.BookCardResponse;
-import com.lumibooks.backend.dto.response.BookDetailResponse;
+import com.lumibooks.backend.dto.book.response.BookCardResponse;
+import com.lumibooks.backend.dto.book.response.BookDetailResponse;
+import com.lumibooks.backend.dto.book.response.BookSuggestionResponse;
 import com.lumibooks.backend.dto.review.response.ReviewPublicResponse;
 import com.lumibooks.backend.enums.BookFormat;
 import com.lumibooks.backend.enums.BookLanguage;
@@ -36,39 +37,19 @@ public class BookPublicController {
     private final BookService bookService;
     private final ReviewService reviewService;
 
-    /**
-     * Retorna los 10 libros activos más recientes para la landing.
-     *
-     * @return lista de hasta 10 libros en formato card
-     */
+    /** Obtiene los libros más recientes. */
     @GetMapping("/latest")
     public ResponseEntity<List<BookCardResponse>> getLatestBooks() {
         return ResponseEntity.ok(bookService.getLatestBooks());
     }
 
-    /**
-     * Retorna los 10 libros mejor calificados para la landing.
-     *
-     * @return lista de hasta 10 libros en formato card
-     */
+    /** Obtiene los libros mejor valorados. */
     @GetMapping("/top-rated")
     public ResponseEntity<List<BookCardResponse>> getTopRatedBooks() {
         return ResponseEntity.ok(bookService.getTopRatedBooks());
     }
 
-    /**
-     * Retorna libros activos con filtros dinámicos para el catálogo público.
-     *
-     * @param search      búsqueda por título, ISBN o autor
-     * @param categoryId  filtro por categoría
-     * @param publisherId filtro por editorial
-     * @param language    filtro por idioma
-     * @param format      filtro por formato
-     * @param minPrice    filtro por precio mínimo
-     * @param maxPrice    filtro por precio máximo
-     * @param pageable    paginación y ordenamiento
-     * @return página de libros en formato card
-     */
+    /** Lista libros públicos aplicando filtros y paginación. */
     @GetMapping
     public ResponseEntity<Page<BookCardResponse>> getBooks(
             @RequestParam(required = false) String search,
@@ -83,17 +64,22 @@ public class BookPublicController {
                 search, categoryId, publisherId, language, format, minPrice, maxPrice, pageable));
     }
 
-    /**
-     * Retorna el detalle completo de un libro activo.
-     *
-     * @param id identificador del libro
-     * @return detalle del libro
-     */
+    /** Devuelve sugerencias de búsqueda de libros. */
+    @GetMapping("/suggestions")
+    public ResponseEntity<List<BookSuggestionResponse>> getBookSuggestions(
+            @RequestParam String search) {
+
+        return ResponseEntity.ok(
+                bookService.getBookSuggestions(search));
+    }
+
+    /** Obtiene el detalle público de un libro. */
     @GetMapping("/{id}")
     public ResponseEntity<BookDetailResponse> getBookDetail(@PathVariable Long id) {
         return ResponseEntity.ok(bookService.getBookDetail(id));
     }
 
+    /** Obtiene las reviews de un libro */
     @GetMapping("/{bookId}/reviews")
     public ResponseEntity<Page<ReviewPublicResponse>> getBookReviews(
             @PathVariable Long bookId,
