@@ -1,5 +1,7 @@
 package com.lumibooks.backend.repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,4 +42,6 @@ public interface PublisherRepository extends JpaRepository<Publisher, Long> {
                         @Param("name") String name,
                         @Param("isActive") Boolean isActive,
                         Pageable pageable);
+
+        List<Publisher> findByIsActiveTrue();
 }

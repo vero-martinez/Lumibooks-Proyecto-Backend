@@ -1,10 +1,13 @@
 package com.lumibooks.backend.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.lumibooks.backend.dto.request.PublisherRequest;
-import com.lumibooks.backend.dto.response.PublisherResponse;
+import com.lumibooks.backend.dto.publisher.request.PublisherRequest;
+import com.lumibooks.backend.dto.publisher.response.PublisherPublicResponse;
+import com.lumibooks.backend.dto.publisher.response.PublisherSummaryResponse;
 
 /**
  * Interfaz del servicio para gestionar editoriales.
@@ -12,36 +15,29 @@ import com.lumibooks.backend.dto.response.PublisherResponse;
  */
 public interface PublisherService {
 
-    /**
-     * Crear una nueva editorial
-     */
-    PublisherResponse create(PublisherRequest request);
+        // Catálogo público
 
-    /**
-     * Obtener editorial por ID
-     */
-    PublisherResponse getById(Long id);
+        /** Lista todas las editoriales activas. */
+        List<PublisherPublicResponse> getAllActive();
 
-    /**
-     * Obtener todas las editoriales con filtros dinámicos
-     * @param name Buscar por nombre (opcional)
-     * @param isActive Filtrar por estado activo/inactivo (opcional)
-     * @param pageable Paginación y ordenamiento
-     */
-    Page<PublisherResponse> getAll(String name, Boolean isActive, Pageable pageable);
+        // Administración
 
-    /**
-     * Actualizar una editorial
-     */
-    PublisherResponse update(Long id, PublisherRequest request);
+        /** Crea una nueva editorial. */
+        PublisherSummaryResponse create(PublisherRequest request);
 
-    /**
-     * Desactivar una editorial (soft delete)
-     */
-    void deactivate(Long id);
+        /** Obtiene una editorial por su ID. */
+        PublisherSummaryResponse getById(Long id);
 
-    /**
-     * Activar una editorial
-     */
-    void activate(Long id);
+        /** Lista editoriales con filtros dinámicos por nombre y estado. */
+        Page<PublisherSummaryResponse> getAll(String name, Boolean isActive, Pageable pageable);
+
+        /** Actualiza los datos de una editorial existente. */
+        PublisherSummaryResponse update(Long id, PublisherRequest request);
+
+        /** Desactiva una editorial (soft delete). */
+        void deactivate(Long id);
+
+        /** Activa una editorial previamente desactivada. */
+        void activate(Long id);
+
 }
