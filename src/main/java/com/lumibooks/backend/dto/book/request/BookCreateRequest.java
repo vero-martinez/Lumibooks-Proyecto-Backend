@@ -1,4 +1,4 @@
-package com.lumibooks.backend.dto.request;
+package com.lumibooks.backend.dto.book.request;
 
 import java.math.BigDecimal;
 import java.util.Set;

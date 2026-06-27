@@ -1,7 +1,7 @@
-package com.lumibooks.backend.dto.response;
+package com.lumibooks.backend.dto.book.response;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -25,7 +25,7 @@ public class BookSummaryResponse {
     private Integer stock;
     private boolean isActive;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate createdAt;
 
 }
