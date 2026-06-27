@@ -19,33 +19,25 @@ public class BookSpecification {
 
             query.distinct(true);
 
-            String searchTerm = "%" + keyword.toLowerCase() + "%";
+            String searchTerm = "%" + keyword.toLowerCase().trim() + "%";
+            String normalizedIsbn = keyword.replaceAll("[^0-9]", "");
 
             var authors = root.join("authors");
 
-            return criteriaBuilder.or(
+            var predicates = criteriaBuilder.or(
 
-                    // Título
                     criteriaBuilder.like(
                             criteriaBuilder.lower(root.get("title")),
                             searchTerm),
 
-                    // ISBN
-                    criteriaBuilder.like(
-                            criteriaBuilder.lower(root.get("isbn")),
-                            searchTerm),
-
-                    // Nombre
                     criteriaBuilder.like(
                             criteriaBuilder.lower(authors.get("firstName")),
                             searchTerm),
 
-                    // Apellido
                     criteriaBuilder.like(
                             criteriaBuilder.lower(authors.get("lastName")),
                             searchTerm),
 
-                    // Nombre completo
                     criteriaBuilder.like(
                             criteriaBuilder.lower(
                                     criteriaBuilder.concat(
@@ -54,6 +46,15 @@ public class BookSpecification {
                                                     " "),
                                             authors.get("lastName"))),
                             searchTerm));
+
+            // Solo comparamos ISBN si el usuario escribió los 13 dígitos completos
+            if (normalizedIsbn.length() == 13) {
+                predicates = criteriaBuilder.or(
+                        predicates,
+                        criteriaBuilder.equal(root.get("isbn"), normalizedIsbn));
+            }
+
+            return predicates;
         };
     }
 

@@ -1,4 +1,4 @@
-package com.lumibooks.backend.dto.response;
+package com.lumibooks.backend.dto.book.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

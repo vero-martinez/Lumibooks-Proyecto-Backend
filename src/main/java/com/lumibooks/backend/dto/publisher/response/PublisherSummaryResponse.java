@@ -1,5 +1,4 @@
-package com.lumibooks.backend.dto.response;
-
+package com.lumibooks.backend.dto.publisher.response;
 
 import java.time.LocalDateTime;
 
@@ -9,12 +8,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * DTO utilizado para mostrar las editoriales en panel admin
+ */
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor 
+@AllArgsConstructor 
 @Builder
-public class CategoryResponse {
+public class PublisherSummaryResponse {
 
     private Long id;
     private String name;

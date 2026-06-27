@@ -1,4 +1,5 @@
-package com.lumibooks.backend.dto.response;
+package com.lumibooks.backend.dto.category.response;
+
 
 import java.time.LocalDateTime;
 
@@ -8,16 +9,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * DTO utilizado para mostrar las categorias en panel admin
+ */
 @Getter
 @Setter
-@NoArgsConstructor 
-@AllArgsConstructor 
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-/**
- * DTO para enviar los datos de una editorial al cliente.
- * Contiene la información que se desea exponer sobre una editorial.
- */
-public class PublisherResponse {
+public class CategorySummaryResponse {
 
     private Long id;
     private String name;

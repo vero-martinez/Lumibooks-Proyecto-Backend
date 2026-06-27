@@ -2,7 +2,7 @@ package com.lumibooks.backend.dto.wishlist.response;
 
 import java.util.List;
 
-import com.lumibooks.backend.dto.response.BookWishlistResponse;
+import com.lumibooks.backend.dto.book.response.BookWishlistResponse;
 
 import lombok.Builder;
 import lombok.Getter;
