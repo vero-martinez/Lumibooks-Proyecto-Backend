@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.lumibooks.backend.dto.request.BookCreateRequest;
-import com.lumibooks.backend.dto.request.BookUpdateRequest;
-import com.lumibooks.backend.dto.response.BookAdminDetailResponse;
-import com.lumibooks.backend.dto.response.BookResponse;
-import com.lumibooks.backend.dto.response.BookSummaryResponse;
+import com.lumibooks.backend.dto.book.request.BookCreateRequest;
+import com.lumibooks.backend.dto.book.request.BookUpdateRequest;
+import com.lumibooks.backend.dto.book.response.BookAdminDetailResponse;
+import com.lumibooks.backend.dto.book.response.BookSummaryResponse;
+import com.lumibooks.backend.dto.book.response.BookResponse;
 import com.lumibooks.backend.enums.BookLanguage;
 import com.lumibooks.backend.service.BookService;
 
