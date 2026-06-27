@@ -6,15 +6,16 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.lumibooks.backend.dto.request.BookCreateRequest;
-import com.lumibooks.backend.dto.request.BookUpdateRequest;
+import com.lumibooks.backend.dto.book.request.BookCreateRequest;
+import com.lumibooks.backend.dto.book.request.BookUpdateRequest;
+import com.lumibooks.backend.dto.book.response.BookAdminDetailResponse;
+import com.lumibooks.backend.dto.book.response.BookCardResponse;
+import com.lumibooks.backend.dto.book.response.BookDetailResponse;
+import com.lumibooks.backend.dto.book.response.BookSuggestionResponse;
+import com.lumibooks.backend.dto.book.response.BookSummaryResponse;
+import com.lumibooks.backend.dto.book.response.BookWishlistResponse;
 import com.lumibooks.backend.dto.response.AuthorPublicResponse;
-import com.lumibooks.backend.dto.response.BookAdminDetailResponse;
-import com.lumibooks.backend.dto.response.BookCardResponse;
-import com.lumibooks.backend.dto.response.BookDetailResponse;
-import com.lumibooks.backend.dto.response.BookResponse;
-import com.lumibooks.backend.dto.response.BookSummaryResponse;
-import com.lumibooks.backend.dto.response.BookWishlistResponse;
+import com.lumibooks.backend.dto.book.response.BookResponse;
 import com.lumibooks.backend.entity.Author;
 import com.lumibooks.backend.entity.Book;
 import com.lumibooks.backend.entity.Category;
@@ -76,7 +77,7 @@ public class BookMapper {
                 .price(book.getPrice())
                 .stock(book.getStock())
                 .isActive(book.isActive())
-                .createdAt(book.getCreatedAt())
+                .createdAt(book.getCreatedAt().toLocalDate())
                 .build();
     }
 
@@ -129,6 +130,15 @@ public class BookMapper {
                 .format(book.getFormat())
                 .editionYear(book.getEditionYear())
                 .categories(extractCategoryNames(book.getCategories()))
+                .build();
+    }
+
+    public BookSuggestionResponse toSuggestionResponse(Book book) {
+        return BookSuggestionResponse.builder()
+                .id(book.getId())
+                .coverImageUrl(book.getCoverImageUrl())
+                .title(book.getTitle())
+                .author(extractFirstAuthorName(book.getAuthors()))
                 .build();
     }
 
@@ -199,6 +209,16 @@ public class BookMapper {
     // Determina la disponibilidad del libro según su stock.
     private boolean isAvailable(Integer stock) {
         return stock != null && stock > 0;
+    }
+
+    private String extractFirstAuthorName(Set<Author> authors) {
+        if (authors == null || authors.isEmpty()) {
+            return null;
+        }
+
+        Author author = authors.iterator().next();
+
+        return author.getFirstName() + " " + author.getLastName();
     }
 
 }
