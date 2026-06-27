@@ -1,17 +1,21 @@
 package com.lumibooks.backend.service.impl;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lumibooks.backend.dto.request.CategoryRequest;
-import com.lumibooks.backend.dto.response.CategoryResponse;
+import com.lumibooks.backend.dto.category.request.CategoryRequest;
+import com.lumibooks.backend.dto.category.response.CategoryPublicResponse;
+import com.lumibooks.backend.dto.category.response.CategorySummaryResponse;
 import com.lumibooks.backend.entity.Category;
 import com.lumibooks.backend.enums.ActionType;
 import com.lumibooks.backend.enums.EntityType;
 import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
+import com.lumibooks.backend.mapper.CategoryMapper;
 import com.lumibooks.backend.repository.CategoryRepository;
 import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.CategoryService;
@@ -28,79 +32,66 @@ import lombok.RequiredArgsConstructor;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
-
     private final ActionLogService actionLogService;
 
-    /**
-     * Crea una nueva categoría validando que no exista otra con el mismo nombre.
-     *
-     * @param request datos de la categoría a crear
-     * @return categoría creada en formato de respuesta
-     */
+    // Catálogo público
+
+    /** Lista todas las categorías activas. */
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategoryPublicResponse> getAllActive() {
+        return categoryRepository.findByIsActiveTrue()
+                .stream()
+                .map(CategoryMapper::toPublicResponse)
+                .toList();
+    }
+
+    // Administración
+
+    /** Crea una nueva categoría. */
     @Override
     @Transactional
-    public CategoryResponse create(CategoryRequest request) {
+    public CategorySummaryResponse create(CategoryRequest request) {
 
         if (categoryRepository.existsByNameIgnoreCase(request.getName())) {
             throw new BadRequestException("Ya existe una categoría con ese nombre");
         }
 
-        Category category = Category.builder()
-                .name(request.getName())
-                .isActive(true)
-                .build();
-
+        Category category = CategoryMapper.toEntity(request);
         Category saved = categoryRepository.save(category);
+
         actionLogService.log(
                 ActionType.CREAR,
                 EntityType.CATEGORY,
                 saved.getId(),
                 "Creó la categoría '" + saved.getName() + "'");
-        return mapToResponse(saved);
+        return CategoryMapper.toSummaryResponse(saved);
     }
 
-    /**
-     * Obtiene una categoría por su identificador.
-     *
-     * @param id identificador de la categoría
-     * @return categoría encontrada
-     */
+    /** Obtiene una categoría por su ID. */
     @Override
     @Transactional(readOnly = true)
-    public CategoryResponse getById(Long id) {
+    public CategorySummaryResponse getById(Long id) {
 
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
-        return mapToResponse(category);
+        return CategoryMapper.toSummaryResponse(category);
     }
 
-    /**
-     * Obtiene una lista paginada de categorías aplicando filtros opcionales.
-     *
-     * @param name   filtro por nombre (opcional)
-     * @param isActive filtro por estado activo/inactivo (opcional)
-     * @param pageable configuración de paginación
-     * @return página de categorías filtradas
-     */
+    /** Lista categorías con filtros dinámicos por nombre y estado. */
     @Override
     @Transactional(readOnly = true)
-    public Page<CategoryResponse> getAll(String name, Boolean isActive, Pageable pageable) {
+    public Page<CategorySummaryResponse> getAll(String name, Boolean isActive, Pageable pageable) {
 
         Page<Category> categories = categoryRepository.findByFilters(name, isActive, pageable);
-        return categories.map(this::mapToResponse);
+        return categories.map(CategoryMapper::toSummaryResponse);
     }
 
-    /**
-     * Actualiza los datos de una categoría existente.
-     *
-     * @param id identificador de la categoría
-     * @param request nuevos datos de la categoría
-     * @return categoría actualizada
-     */
+    /** Actualiza los datos de una categoría existente. */
     @Override
     @Transactional
-    public CategoryResponse update(Long id, CategoryRequest request) {
+    public CategorySummaryResponse update(Long id, CategoryRequest request) {
 
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
@@ -118,14 +109,10 @@ public class CategoryServiceImpl implements CategoryService {
                 EntityType.CATEGORY,
                 updated.getId(),
                 "Editó la categoría '" + updated.getName() + "'");
-        return mapToResponse(updated);
+        return CategoryMapper.toSummaryResponse(updated);
     }
 
-    /**
-     * Desactiva una categoría (soft delete).
-     *
-     * @param id identificador de la categoría
-     */
+    /** Desactiva una categoría (soft delete). */
     @Override
     @Transactional
     public void deactivate(Long id) {
@@ -147,11 +134,7 @@ public class CategoryServiceImpl implements CategoryService {
                 "Cambió el estado de la categoría '" + category.getName() + "' a INACTIVO");
     }
 
-    /**
-     * Activa una categoría previamente desactivada.
-     *
-     * @param id identificador de la categoría
-     */
+    /** Activa una categoría previamente desactivada. */
     @Override
     @Transactional
     public void activate(Long id) {
@@ -171,21 +154,5 @@ public class CategoryServiceImpl implements CategoryService {
                 EntityType.CATEGORY,
                 category.getId(),
                 "Cambió el estado de la categoría '" + category.getName() + "' a ACTIVO");
-    }
-
-    /**
-     * Convierte una entidad Category a su DTO de respuesta.
-     *
-     * @param category entidad a convertir
-     * @return DTO de respuesta
-     */
-    private CategoryResponse mapToResponse(Category category) {
-        return CategoryResponse.builder()
-                .id(category.getId())
-                .name(category.getName())
-                .isActive(category.getIsActive())
-                .createdAt(category.getCreatedAt())
-                .updatedAt(category.getUpdatedAt())
-                .build();
     }
 }

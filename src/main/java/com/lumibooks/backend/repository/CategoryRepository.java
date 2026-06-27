@@ -1,5 +1,6 @@
 package com.lumibooks.backend.repository;
 
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +28,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * Si el nombre es null no se filtra por nombre.
      * Si activo es null no se filtra por estado.
      *
-     * @param name   filtro por nombre (opcional)
-     * @param isActive   filtro por estado activo o inactivo (opcional)
+     * @param name     filtro por nombre (opcional)
+     * @param isActive filtro por estado activo o inactivo (opcional)
      * @param pageable configuración de paginación
      * @return página de categorias filtradas
      */
@@ -41,5 +42,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
             @Param("name") String name,
             @Param("isActive") Boolean isActive,
             Pageable pageable);
+
+    List<Category> findByIsActiveTrue();
 
 }

@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.lumibooks.backend.dto.request.CategoryRequest;
-import com.lumibooks.backend.dto.response.CategoryResponse;
+import com.lumibooks.backend.dto.category.request.CategoryRequest;
+import com.lumibooks.backend.dto.category.response.CategorySummaryResponse;
 import com.lumibooks.backend.service.CategoryService;
 
 import jakarta.validation.Valid;
@@ -22,79 +22,51 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/admin/categories")
 @RequiredArgsConstructor
-public class CategoryController {
+public class CategoryAdminController {
 
     private final CategoryService categoryService;
 
-    /**
-     * Crea una nueva categoría.
-     *
-     * @param request datos de la categoría
-     * @return categoría creada
-     */
+    /** Crea una nueva categoría. */
     @PostMapping
-    public ResponseEntity<CategoryResponse> create(
+    public ResponseEntity<CategorySummaryResponse> create(
             @Valid @RequestBody CategoryRequest request) {
 
-        CategoryResponse response = categoryService.create(request);
+        CategorySummaryResponse response = categoryService.create(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Obtiene una categoría por ID.
-     *
-     * @param id identificador de la categoría
-     * @return categoría encontrada
-     */
+    /** Obtiene una categoría por ID. */
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<CategorySummaryResponse> getById(@PathVariable Long id) {
 
-        CategoryResponse response = categoryService.getById(id);
+        CategorySummaryResponse response = categoryService.getById(id);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Lista categorías aplicando filtros opcionales y paginación.
-     *
-     * @param name   filtro por nombre
-     * @param isActive   filtro por estado activo/inactivo
-     * @param pageable configuración de paginación
-     * @return lista paginada de categorías
-     */
+    /** Lista categorías aplicando filtros opcionales y paginación. */
     @GetMapping
-    public ResponseEntity<Page<CategoryResponse>> getAll(
+    public ResponseEntity<Page<CategorySummaryResponse>> getAll(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Boolean isActive,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<CategoryResponse> response = categoryService.getAll(name, isActive, pageable);
+        Page<CategorySummaryResponse> response = categoryService.getAll(name, isActive, pageable);
 
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Actualiza una categoría existente.
-     *
-     * @param id      identificador de la categoría
-     * @param request nuevos datos
-     * @return categoría actualizada
-     */
+    /** Actualiza una categoría existente. */
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryResponse> update(
+    public ResponseEntity<CategorySummaryResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody CategoryRequest request) {
 
-        CategoryResponse response = categoryService.update(id, request);
+        CategorySummaryResponse response = categoryService.update(id, request);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Desactiva una categoría (soft delete).
-     *
-     * @param id identificador de la categoría
-     * @return respuesta vacía
-     */
+    /** Desactiva una categoría (soft delete). */
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
 
@@ -103,12 +75,7 @@ public class CategoryController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Reactiva una categoría previamente desactivada.
-     *
-     * @param id identificador de la categoría
-     * @return respuesta vacía
-     */
+    /** Reactiva una categoría previamente desactivada. */
     @PatchMapping("/{id}/activate")
     public ResponseEntity<Void> activate(@PathVariable Long id) {
 
