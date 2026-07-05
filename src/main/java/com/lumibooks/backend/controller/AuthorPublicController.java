@@ -10,16 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lumibooks.backend.dto.response.AuthorPublicResponse;
+import com.lumibooks.backend.dto.author.response.AuthorDetailResponse;
+import com.lumibooks.backend.dto.author.response.AuthorPublicResponse;
 import com.lumibooks.backend.service.AuthorService;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * Controlador público para la gestión y consulta de autores.
- * Expone endpoints públicos para listar autores activos y obtener
- * los detalles públicos de un autor específico.
- */
 @RestController
 @RequestMapping("/api/public/authors")
 @RequiredArgsConstructor
@@ -27,30 +23,15 @@ public class AuthorPublicController {
 
     private final AuthorService authorService;
 
-    /**
-     * Obtiene una lista paginada de autores activos para la vista pública.
-     * Permite filtrar opcionalmente por nombre o apellido.
-     * 
-     * @param name     filtro opcional para buscar por nombre o apellido.
-     * @param pageable información de paginación y ordenamiento.
-     * @return página de autores activos visibles públicamente.
-     */
     @GetMapping
     public ResponseEntity<Page<AuthorPublicResponse>> getAuthors(
-            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String search,
             @PageableDefault(size = 10, sort = "firstName") Pageable pageable) {
-        return ResponseEntity.ok(authorService.getAuthorsPublic(name, pageable));
+        return ResponseEntity.ok(authorService.getAuthorsPublic(search, pageable));
     }
 
-    /**
-     * Obtiene los detalles públicos de un autor por su ID.
-     * Solo devuelve información de autores que se encuentren activos.
-     * 
-     * @param id identificador del autor.
-     * @return detalles públicos del autor encontrado.
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorPublicResponse> getAuthorById(@PathVariable Long id) {
+    public ResponseEntity<AuthorDetailResponse> getAuthorById(@PathVariable Long id) {
         return ResponseEntity.ok(authorService.getAuthorByIdPublic(id));
     }
 

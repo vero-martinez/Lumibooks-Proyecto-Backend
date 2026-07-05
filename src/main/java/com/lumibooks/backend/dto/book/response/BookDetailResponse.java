@@ -3,7 +3,7 @@ package com.lumibooks.backend.dto.book.response;
 import java.math.BigDecimal;
 import java.util.List;
 
-import com.lumibooks.backend.dto.response.AuthorPublicResponse;
+import com.lumibooks.backend.dto.author.response.AuthorDetailResponse;
 import com.lumibooks.backend.enums.BookFormat;
 import com.lumibooks.backend.enums.BookLanguage;
 
@@ -21,7 +21,7 @@ public class BookDetailResponse {
     private Long id;
     private String coverImageUrl;
     private String title;
-    private List<AuthorPublicResponse> authors;
+    private List<AuthorDetailResponse> authors;
     /**
      * Indica si el libro está disponible (Stock > 0)
      */

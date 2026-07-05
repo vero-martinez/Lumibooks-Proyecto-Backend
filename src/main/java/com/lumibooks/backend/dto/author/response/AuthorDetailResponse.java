@@ -1,4 +1,4 @@
-package com.lumibooks.backend.dto.response;
+package com.lumibooks.backend.dto.author.response;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import lombok.Getter;
  * - Proporciona una vista pública de los datos de un autor.
  * - Incluye información básica como ID, nombre y apellido.
  */
-public class AuthorPublicResponse {
+public class AuthorDetailResponse {
 
     private Long id;
     private String firstName;

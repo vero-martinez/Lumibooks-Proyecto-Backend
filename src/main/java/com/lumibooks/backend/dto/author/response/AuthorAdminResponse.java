@@ -1,4 +1,4 @@
-package com.lumibooks.backend.dto.response;
+package com.lumibooks.backend.dto.author.response;
 
 import java.time.LocalDateTime;
 

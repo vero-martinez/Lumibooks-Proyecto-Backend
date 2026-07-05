@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.lumibooks.backend.dto.author.response.AuthorDetailResponse;
 import com.lumibooks.backend.dto.book.request.BookCreateRequest;
 import com.lumibooks.backend.dto.book.request.BookUpdateRequest;
 import com.lumibooks.backend.dto.book.response.BookAdminDetailResponse;
@@ -14,7 +15,6 @@ import com.lumibooks.backend.dto.book.response.BookDetailResponse;
 import com.lumibooks.backend.dto.book.response.BookSuggestionResponse;
 import com.lumibooks.backend.dto.book.response.BookSummaryResponse;
 import com.lumibooks.backend.dto.book.response.BookWishlistResponse;
-import com.lumibooks.backend.dto.response.AuthorPublicResponse;
 import com.lumibooks.backend.dto.book.response.BookResponse;
 import com.lumibooks.backend.entity.Author;
 import com.lumibooks.backend.entity.Book;
@@ -52,7 +52,7 @@ public class BookMapper {
                 .id(book.getId())
                 .coverImageUrl(book.getCoverImageUrl())
                 .title(book.getTitle())
-                .authors(extractAuthorPublicResponses(book.getAuthors()))
+                .authors(extractAuthorDetailResponses(book.getAuthors()))
                 .available(isAvailable(book.getStock()))
                 .description(book.getDescription())
                 .price(book.getPrice())
@@ -120,7 +120,7 @@ public class BookMapper {
                 .id(book.getId())
                 .coverImageUrl(book.getCoverImageUrl())
                 .title(book.getTitle())
-                .authors(extractAuthorPublicResponses(book.getAuthors()))
+                .authors(extractAuthorNames(book.getAuthors()))
                 .description(book.getDescription())
                 .price(book.getPrice())
                 .isbn(book.getIsbn())
@@ -182,12 +182,12 @@ public class BookMapper {
     }
 
     // Mapea los autores a sus respuestas públicas.
-    private List<AuthorPublicResponse> extractAuthorPublicResponses(Set<Author> authors) {
+    private List<AuthorDetailResponse> extractAuthorDetailResponses(Set<Author> authors) {
         if (authors == null || authors.isEmpty()) {
             return List.of();
         }
         return authors.stream()
-                .map(authorMapper::toPublicResponse)
+                .map(authorMapper::toDetailResponse)
                 .toList();
     }
 
