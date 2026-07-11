@@ -1,8 +1,8 @@
 package com.lumibooks.backend.entity;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -17,6 +17,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderBy;
+
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,6 +58,7 @@ public class Cart {
 
     @Builder.Default
     @OneToMany(mappedBy = "cart", fetch = FetchType.LAZY)
-    private Set<CartItem> items = new HashSet<>();
+    @OrderBy("id ASC")
+    private List<CartItem> items = new ArrayList<>();
 
 }
