@@ -73,13 +73,20 @@ public class CartServiceImpl implements CartService {
         User user = authenticatedUserProvider.getAuthenticatedUser();
         Cart cart = resolveCart(user);
 
-        if (cartItemRepository.existsByCartIdAndBookId(cart.getId(), request.getBookId())) {
-            throw new BadRequestException("El libro ya está en el carrito");
-        }
-
         Book book = bookRepository.findByIdAndIsActiveTrue(request.getBookId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Libro no encontrado con id: " + request.getBookId()));
+
+        var existingItem = cartItemRepository.findByCartIdAndBookId(cart.getId(), request.getBookId());
+
+        if (existingItem.isPresent()) {
+            CartItem item = existingItem.get();
+            int newQuantity = item.getQuantity() + request.getQuantity();
+            validateStock(book, newQuantity);
+            item.setQuantity(newQuantity);
+            cartItemRepository.save(item);
+            return;
+        }
 
         validateStock(book, request.getQuantity());
 
