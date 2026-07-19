@@ -1,5 +1,7 @@
 package com.lumibooks.backend.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -22,6 +24,12 @@ import lombok.RequiredArgsConstructor;
 public class AuthorPublicController {
 
     private final AuthorService authorService;
+
+    @GetMapping("/all")
+    public ResponseEntity<List<AuthorPublicResponse>> getAllActive(
+            @RequestParam(required = false) String search) {
+        return ResponseEntity.ok(authorService.getAllActive(search));
+    }
 
     @GetMapping
     public ResponseEntity<Page<AuthorPublicResponse>> getAuthors(

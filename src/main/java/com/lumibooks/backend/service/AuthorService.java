@@ -1,5 +1,7 @@
 package com.lumibooks.backend.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,5 +28,7 @@ public interface AuthorService {
     Page<AuthorPublicResponse> getAuthorsPublic(String search, Pageable pageable);
 
     AuthorDetailResponse getAuthorByIdPublic(Long id);
+
+    List<AuthorPublicResponse> getAllActive(String search);
 
 }

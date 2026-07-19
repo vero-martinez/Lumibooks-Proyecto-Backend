@@ -1,5 +1,7 @@
 package com.lumibooks.backend.service.impl;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -166,6 +168,21 @@ public class AuthorServiceImpl implements AuthorService {
                 }
 
                 return authorMapper.toDetailResponse(author);
+        }
+
+        @Override
+        @Transactional(readOnly = true)
+        public List<AuthorPublicResponse> getAllActive(String search) {
+                Specification<Author> spec = AuthorSpecification.isActive();
+
+                if (search != null && !search.isBlank()) {
+                        spec = spec.and(AuthorSpecification.search(search));
+                }
+
+                return authorRepository.findAll(spec)
+                                .stream()
+                                .map(authorMapper::toPublicResponse)
+                                .toList();
         }
 
 }
