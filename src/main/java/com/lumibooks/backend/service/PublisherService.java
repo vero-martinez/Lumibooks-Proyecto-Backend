@@ -18,7 +18,7 @@ public interface PublisherService {
         // Catálogo público
 
         /** Lista todas las editoriales activas. */
-        List<PublisherPublicResponse> getAllActive();
+        List<PublisherPublicResponse> getAllActive(String name);
 
         // Administración
 

@@ -44,4 +44,6 @@ public interface PublisherRepository extends JpaRepository<Publisher, Long> {
                         Pageable pageable);
 
         List<Publisher> findByIsActiveTrue();
+
+        List<Publisher> findByNameContainingIgnoreCaseAndIsActiveTrue(String name);
 }
