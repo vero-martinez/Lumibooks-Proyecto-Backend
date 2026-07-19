@@ -36,12 +36,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     // Catálogo público
 
-    /** Lista todas las categorías activas. */
+    /** Lista categorías activas, opcionalmente filtradas por nombre. */
     @Override
     @Transactional(readOnly = true)
-    public List<CategoryPublicResponse> getAllActive() {
-        return categoryRepository.findByIsActiveTrue()
-                .stream()
+    public List<CategoryPublicResponse> getAllActive(String name) {
+        List<Category> categories = (name != null && !name.isBlank())
+                ? categoryRepository.findByNameContainingIgnoreCaseAndIsActiveTrue(name)
+                : categoryRepository.findByIsActiveTrue();
+        return categories.stream()
                 .map(CategoryMapper::toPublicResponse)
                 .toList();
     }

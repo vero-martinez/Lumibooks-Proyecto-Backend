@@ -14,7 +14,7 @@ public interface CategoryService {
         // Catálogo público
 
         /** Lista todas las categorías activas. */
-        List<CategoryPublicResponse> getAllActive();
+        List<CategoryPublicResponse> getAllActive(String name);
 
         // Administración
 
