@@ -3,6 +3,7 @@ package com.lumibooks.backend.dto.book.response;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lumibooks.backend.enums.BookFormat;
@@ -23,6 +24,7 @@ public class BookAdminDetailResponse {
     private String coverImageUrl;
     private String title;
     private List<String> authors;
+    private Set<Long> authorIds;
     /**
      * Indica si el libro está disponible (Stock > 0)
      */
@@ -30,13 +32,15 @@ public class BookAdminDetailResponse {
     private BigDecimal price;
     private String isbn;
     private Integer pageCount;
+    private Long publisherId;
     private String publisherName;
     private BookLanguage language;
     private BookFormat format;
     private Short editionYear;
     private List<String> categories;
+    private Set<Long> categoryIds;
     private Integer stock;
-    private boolean isActive;
+    private Boolean isActive;
     private Double averageRating;
     private Long totalReviews;
 
