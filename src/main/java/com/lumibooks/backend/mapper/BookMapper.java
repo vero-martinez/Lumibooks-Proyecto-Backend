@@ -87,15 +87,18 @@ public class BookMapper {
                 .coverImageUrl(book.getCoverImageUrl())
                 .title(book.getTitle())
                 .authors(extractAuthorNames(book.getAuthors()))
+                .authorIds(extractAuthorIds(book.getAuthors()))
                 .description(book.getDescription())
                 .price(book.getPrice())
                 .isbn(book.getIsbn())
                 .pageCount(book.getPageCount())
+                .publisherId(book.getPublisher() != null ? book.getPublisher().getId() : null)
                 .publisherName(extractPublisherName(book.getPublisher()))
                 .language(book.getLanguage())
                 .format(book.getFormat())
                 .editionYear(book.getEditionYear())
                 .categories(extractCategoryNames(book.getCategories()))
+                .categoryIds(extractCategoryIds(book.getCategories()))
                 .stock(book.getStock())
                 .isActive(book.isActive())
                 .createdAt(book.getCreatedAt())
@@ -199,6 +202,26 @@ public class BookMapper {
         return categories.stream()
                 .map(Category::getName)
                 .toList();
+    }
+
+    // Extrae los IDs de los autores.
+    private Set<Long> extractAuthorIds(Set<Author> authors) {
+        if (authors == null || authors.isEmpty()) {
+            return Set.of();
+        }
+        return authors.stream()
+                .map(Author::getId)
+                .collect(java.util.stream.Collectors.toSet());
+    }
+
+    // Extrae los IDs de las categorías.
+    private Set<Long> extractCategoryIds(Set<Category> categories) {
+        if (categories == null || categories.isEmpty()) {
+            return Set.of();
+        }
+        return categories.stream()
+                .map(Category::getId)
+                .collect(java.util.stream.Collectors.toSet());
     }
 
     // Mapea la editorial a su nombre.

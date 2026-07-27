@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lumibooks.backend.dto.category.response.CategoryPublicResponse;
@@ -23,9 +24,10 @@ public class CategoryPublicController {
 
     private final CategoryService categoryService;
 
-    /** Lista todas las categorías activas. */
+    /** Lista categorías activas, opcionalmente filtradas por nombre. */
     @GetMapping
-    public ResponseEntity<List<CategoryPublicResponse>> getAllActive() {
-        return ResponseEntity.ok(categoryService.getAllActive());
+    public ResponseEntity<List<CategoryPublicResponse>> getAllActive(
+            @RequestParam(required = false) String name) {
+        return ResponseEntity.ok(categoryService.getAllActive(name));
     }
 }

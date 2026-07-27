@@ -45,4 +45,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     List<Category> findByIsActiveTrue();
 
+    List<Category> findByNameContainingIgnoreCaseAndIsActiveTrue(String name);
+
 }

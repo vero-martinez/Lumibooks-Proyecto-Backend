@@ -36,12 +36,14 @@ public class PublisherServiceImpl implements PublisherService {
 
     // Catálogo público
 
-    /** Lista todas las editoriales activas. */
+    /** Lista editoriales activas, opcionalmente filtradas por nombre. */
     @Override
     @Transactional(readOnly = true)
-    public List<PublisherPublicResponse> getAllActive() {
-        return publisherRepository.findByIsActiveTrue()
-                .stream()
+    public List<PublisherPublicResponse> getAllActive(String name) {
+        List<Publisher> publishers = (name != null && !name.isBlank())
+                ? publisherRepository.findByNameContainingIgnoreCaseAndIsActiveTrue(name)
+                : publisherRepository.findByIsActiveTrue();
+        return publishers.stream()
                 .map(PublisherMapper::toPublicResponse)
                 .toList();
     }

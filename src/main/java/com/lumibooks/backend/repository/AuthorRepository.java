@@ -1,5 +1,7 @@
 package com.lumibooks.backend.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -16,5 +18,7 @@ public interface AuthorRepository extends JpaRepository<Author, Long>, JpaSpecif
      * @return true si existe un autor con ese nombre y apellido, false si no existe
      */
     boolean existsByFirstNameIgnoreCaseAndLastNameIgnoreCase(String firstName, String lastName);
+
+    List<Author> findByIsActiveTrue();
 
 }

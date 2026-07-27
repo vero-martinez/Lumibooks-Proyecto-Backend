@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +24,8 @@ public class BookSummaryResponse {
     private List<String> authors;
     private BigDecimal price;
     private Integer stock;
+
+    @JsonProperty("isActive")
     private boolean isActive;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
