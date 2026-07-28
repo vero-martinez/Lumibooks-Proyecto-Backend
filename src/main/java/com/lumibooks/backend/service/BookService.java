@@ -33,6 +33,7 @@ public interface BookService {
                         String search,
                         Long categoryId,
                         Long publisherId,
+                        Long authorId,
                         BookLanguage language,
                         BookFormat format,
                         BigDecimal minPrice,

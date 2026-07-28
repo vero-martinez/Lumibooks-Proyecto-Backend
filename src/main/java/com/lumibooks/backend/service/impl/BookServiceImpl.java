@@ -99,6 +99,7 @@ public class BookServiceImpl implements BookService {
             String search,
             Long categoryId,
             Long publisherId,
+            Long authorId,
             BookLanguage language,
             BookFormat format,
             BigDecimal minPrice,
@@ -116,6 +117,11 @@ public class BookServiceImpl implements BookService {
         if (publisherId != null) {
             spec = spec.and(BookSpecification.hasPublisher(publisherId));
         }
+
+        if (authorId != null) {
+            spec = spec.and(BookSpecification.hasAuthor(authorId));
+        }
+        
         if (language != null) {
             spec = spec.and(BookSpecification.hasLanguage(language));
         }
@@ -128,6 +134,8 @@ public class BookServiceImpl implements BookService {
         if (maxPrice != null) {
             spec = spec.and(BookSpecification.hasMaxPrice(maxPrice));
         }
+
+        
 
         Page<Book> books = bookRepository.findAll(spec, pageable);
         Map<Long, double[]> statsMap = getRatingStatsMap(books.map(Book::getId).toList());
