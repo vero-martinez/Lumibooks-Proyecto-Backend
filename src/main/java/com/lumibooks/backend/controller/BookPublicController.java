@@ -55,13 +55,14 @@ public class BookPublicController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long publisherId,
+            @RequestParam(required = false) Long authorId,
             @RequestParam(required = false) BookLanguage language,
             @RequestParam(required = false) BookFormat format,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @PageableDefault(size = 12, sort = "createdAt") Pageable pageable) {
         return ResponseEntity.ok(bookService.getBooks(
-                search, categoryId, publisherId, language, format, minPrice, maxPrice, pageable));
+                search, categoryId, publisherId, authorId, language, format, minPrice, maxPrice, pageable));
     }
 
     /** Devuelve sugerencias de búsqueda de libros. */

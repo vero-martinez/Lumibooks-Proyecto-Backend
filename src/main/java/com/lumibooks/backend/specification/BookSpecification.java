@@ -109,4 +109,14 @@ public class BookSpecification {
         return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isActive"), isActive);
     }
 
+    // Filtrar por autor
+    public static Specification<Book> hasAuthor(Long authorId) {
+        return (root, query, criteriaBuilder) -> {
+            query.distinct(true);
+            return criteriaBuilder.equal(
+                    root.join("authors").get("id"),
+                    authorId);
+        };
+    }
+
 }
