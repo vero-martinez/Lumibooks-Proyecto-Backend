@@ -114,47 +114,18 @@ public class CategoryServiceImpl implements CategoryService {
         return CategoryMapper.toSummaryResponse(updated);
     }
 
-    /** Desactiva una categoría (soft delete). */
     @Override
     @Transactional
-    public void deactivate(Long id) {
-
+    public void toggleStatus(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
-
-        if (!category.getIsActive()) {
-            throw new BadRequestException("La categoría ya está desactivada");
-        }
-
-        category.setIsActive(false);
+        category.setIsActive(!category.getIsActive());
         categoryRepository.save(category);
-
         actionLogService.log(
                 ActionType.CAMBIAR_ESTADO,
                 EntityType.CATEGORY,
                 category.getId(),
-                "Cambió el estado de la categoría '" + category.getName() + "' a INACTIVO");
-    }
-
-    /** Activa una categoría previamente desactivada. */
-    @Override
-    @Transactional
-    public void activate(Long id) {
-
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
-
-        if (category.getIsActive()) {
-            throw new BadRequestException("La categoría ya está activa");
-        }
-
-        category.setIsActive(true);
-        categoryRepository.save(category);
-
-        actionLogService.log(
-                ActionType.CAMBIAR_ESTADO,
-                EntityType.CATEGORY,
-                category.getId(),
-                "Cambió el estado de la categoría '" + category.getName() + "' a ACTIVO");
+                "Cambió el estado de la categoría '" + category.getName() + "' a "
+                        + (category.getIsActive() ? "ACTIVO" : "INACTIVO"));
     }
 }

@@ -16,7 +16,6 @@ public class CategoryMapper {
     public static Category toEntity(CategoryRequest request) {
         return Category.builder()
                 .name(request.getName())
-                .isActive(true)
                 .build();
     }
 

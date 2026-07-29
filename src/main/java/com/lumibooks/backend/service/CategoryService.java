@@ -30,10 +30,6 @@ public interface CategoryService {
         /** Actualiza los datos de una categoría existente. */
         CategorySummaryResponse update(Long id, CategoryRequest request);
 
-        /** Desactiva una categoría (soft delete). */
-        void deactivate(Long id);
-
-        /** Activa una categoría previamente desactivada. */
-        void activate(Long id);
-
+        /** Cambia el estado activo/inactivo de una categoría. */
+        void toggleStatus(Long id);
 }
