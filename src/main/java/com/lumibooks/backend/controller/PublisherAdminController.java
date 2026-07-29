@@ -57,7 +57,7 @@ public class PublisherAdminController {
     }
 
     /** Actualiza una editorial existente. */
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<PublisherSummaryResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody PublisherRequest request) {
@@ -66,21 +66,10 @@ public class PublisherAdminController {
         return ResponseEntity.ok(response);
     }
 
-    /** Desactiva una editorial (soft delete). */
-    @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<Void> deactivate(@PathVariable Long id) {
-
-        publisherService.deactivate(id);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    /** Reactiva una editorial previamente desactivada. */
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<Void> activate(@PathVariable Long id) {
-
-        publisherService.activate(id);
-
+    /** Desactivar o activar una editorial */
+    @PatchMapping("/{id}/toggle-status")
+    public ResponseEntity<Void> toggleStatus(@PathVariable Long id) {
+        publisherService.toggleStatus(id);
         return ResponseEntity.noContent().build();
     }
 }

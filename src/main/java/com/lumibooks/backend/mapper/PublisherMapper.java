@@ -16,7 +16,6 @@ public class PublisherMapper {
     public static Publisher toEntity(PublisherRequest request) {
         return Publisher.builder()
                 .name(request.getName())
-                .isActive(true)
                 .build();
     }
 

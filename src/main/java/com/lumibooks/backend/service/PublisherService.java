@@ -34,10 +34,6 @@ public interface PublisherService {
         /** Actualiza los datos de una editorial existente. */
         PublisherSummaryResponse update(Long id, PublisherRequest request);
 
-        /** Desactiva una editorial (soft delete). */
-        void deactivate(Long id);
-
-        /** Activa una editorial previamente desactivada. */
-        void activate(Long id);
-
+        /** Desactivar o Activar una editorial */
+        void toggleStatus(Long id);
 }

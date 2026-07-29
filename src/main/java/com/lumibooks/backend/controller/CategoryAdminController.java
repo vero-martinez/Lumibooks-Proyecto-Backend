@@ -57,7 +57,7 @@ public class CategoryAdminController {
     }
 
     /** Actualiza una categoría existente. */
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<CategorySummaryResponse> update(
             @PathVariable Long id,
             @Valid @RequestBody CategoryRequest request) {
@@ -66,21 +66,10 @@ public class CategoryAdminController {
         return ResponseEntity.ok(response);
     }
 
-    /** Desactiva una categoría (soft delete). */
-    @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<Void> deactivate(@PathVariable Long id) {
-
-        categoryService.deactivate(id);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    /** Reactiva una categoría previamente desactivada. */
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<Void> activate(@PathVariable Long id) {
-
-        categoryService.activate(id);
-
+    /** Activar o desactivar una categoría */
+    @PatchMapping("/{id}/toggle-status")
+    public ResponseEntity<Void> toggleStatus(@PathVariable Long id) {
+        categoryService.toggleStatus(id);
         return ResponseEntity.noContent().build();
     }
 }
