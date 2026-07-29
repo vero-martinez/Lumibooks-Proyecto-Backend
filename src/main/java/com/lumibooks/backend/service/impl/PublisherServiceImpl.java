@@ -108,41 +108,16 @@ public class PublisherServiceImpl implements PublisherService {
         return PublisherMapper.toSummaryResponse(updated);
     }
 
-    /** Desactiva una editorial (soft delete). */
+    /** Desactivar o activar una editorial */
     @Override
     @Transactional
-    public void deactivate(Long id) {
-
+    public void toggleStatus(Long id) {
         Publisher publisher = publisherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
-
-        if (!publisher.getIsActive()) {
-            throw new BadRequestException("La editorial ya está desactivada");
-        }
-
-        publisher.setIsActive(false);
+        publisher.setIsActive(!publisher.getIsActive());
         publisherRepository.save(publisher);
-
         actionLogService.log(ActionType.CAMBIAR_ESTADO, EntityType.PUBLISHER, publisher.getId(),
-                "Cambió el estado de la editorial '" + publisher.getName() + "' a INACTIVO");
-    }
-
-    /** Activa una editorial previamente desactivada. */
-    @Override
-    @Transactional
-    public void activate(Long id) {
-
-        Publisher publisher = publisherRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Editorial no encontrada"));
-
-        if (publisher.getIsActive()) {
-            throw new BadRequestException("La editorial ya está activa");
-        }
-
-        publisher.setIsActive(true);
-        publisherRepository.save(publisher);
-
-        actionLogService.log(ActionType.CAMBIAR_ESTADO, EntityType.PUBLISHER, publisher.getId(),
-                "Cambió el estado de la editorial '" + publisher.getName() + "' a ACTIVO");
+                "Cambió el estado de la editorial '" + publisher.getName() + "' a "
+                        + (publisher.getIsActive() ? "ACTIVO" : "INACTIVO"));
     }
 }
