@@ -5,8 +5,10 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.lumibooks.backend.dto.user.request.UserCreateRequest;
+import com.lumibooks.backend.dto.user.request.UserProfileUpdateRequest;
 import com.lumibooks.backend.dto.user.request.UserUpdateRequest;
 import com.lumibooks.backend.dto.user.response.UserAdminDetailResponse;
+import com.lumibooks.backend.dto.user.response.UserMeResponse;
 import com.lumibooks.backend.dto.user.response.UserSummaryResponse;
 import com.lumibooks.backend.entity.User;
 
@@ -46,6 +48,18 @@ public class UserMapper {
                 .build();
     }
 
+    public UserMeResponse toMeResponse(User user) {
+        return UserMeResponse.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .dni(user.getDni())
+                .cellphone(user.getCellphone())
+                .isSubscribed(user.getSubscriber() != null)
+                .build();
+    }
+
     // ============ Request DTO --> Entity ============
 
     public User toEntity(UserCreateRequest request, String encodedPassword) {
@@ -66,6 +80,12 @@ public class UserMapper {
         Optional.ofNullable(request.getCellphone()).ifPresent(user::setCellphone);
         Optional.ofNullable(request.getRole()).ifPresent(user::setRole);
         Optional.ofNullable(request.getIsActive()).ifPresent(user::setActive);
+    }
+
+    public void updateMeEntity(UserProfileUpdateRequest request, User user) {
+        Optional.ofNullable(request.getFirstName()).ifPresent(user::setFirstName);
+        Optional.ofNullable(request.getLastName()).ifPresent(user::setLastName);
+        Optional.ofNullable(request.getCellphone()).ifPresent(user::setCellphone);
     }
 
 }
