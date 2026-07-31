@@ -119,4 +119,11 @@ public class RefreshTokenService {
         refreshTokenRepository.findByUserIdAndRevokedFalse(userId)
                 .forEach(token -> token.setRevoked(true));
     }
+
+    // Encuentra la familia del token (por su hash) y la revoca (para logout)
+    @Transactional
+    public void revokeFamilyByToken(String rawToken) {
+        refreshTokenRepository.findByTokenHash(hashToken(rawToken))
+                .ifPresent(token -> revokeFamily(token.getFamilyId()));
+    }
 }
