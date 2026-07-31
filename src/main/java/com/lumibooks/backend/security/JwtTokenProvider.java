@@ -7,11 +7,13 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.lumibooks.backend.entity.User;
 import com.lumibooks.backend.exception.UnauthorizedException;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Clase encargada de gestionar operaciones relacionadas con JWT.
@@ -57,18 +59,17 @@ public class JwtTokenProvider {
     /**
      * Genera un token JWT para el usuario autenticado.
      *
-     * @param email email del usuario autenticado
      * @return token JWT generado
      */
-    public String generateToken(String email) {
+    public String generateToken(User user) {
 
         Date now = new Date();
-
-        Date expiryDate =
-                new Date(now.getTime() + jwtExpiration);
+        Date expiryDate = new Date(now.getTime() + jwtExpiration);
 
         return Jwts.builder()
-                .subject(email)
+                .subject(user.getEmail())
+                .claim("role", user.getRole().name())
+                .id(UUID.randomUUID().toString())
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(key)
@@ -99,6 +100,19 @@ public class JwtTokenProvider {
             throw new UnauthorizedException(
                     "Token inválido o expirado"
             );
+        }
+    }
+
+    public String getJtiFromToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claims.getId();
+        } catch (Exception e) {
+            throw new UnauthorizedException("Token inválido o expirado");
         }
     }
 
