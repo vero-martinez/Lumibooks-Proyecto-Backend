@@ -91,6 +91,9 @@ public class RefreshTokenService {
         if (old.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new UnauthorizedException("Sesión expirada");
         }
+        if (!old.getUser().isActive()) {
+            throw new UnauthorizedException("Cuenta desactivada");
+        }
 
         // Crear el hijo en la misma familia y marcar el padre como reemplazado
         String raw = generateRawToken();
