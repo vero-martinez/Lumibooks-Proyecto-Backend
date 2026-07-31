@@ -52,8 +52,7 @@ public class JwtTokenProvider {
     @PostConstruct
     public void init() {
         this.key = Keys.hmacShaKeyFor(
-                jwtSecret.getBytes(StandardCharsets.UTF_8)
-        );
+                jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -69,6 +68,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .subject(user.getEmail())
                 .claim("role", user.getRole().name())
+                .claim("tokenVersion", user.getTokenVersion())
                 .id(UUID.randomUUID().toString())
                 .issuedAt(now)
                 .expiration(expiryDate)
@@ -98,8 +98,7 @@ public class JwtTokenProvider {
         } catch (Exception e) {
 
             throw new UnauthorizedException(
-                    "Token inválido o expirado"
-            );
+                    "Token inválido o expirado");
         }
     }
 
@@ -111,6 +110,19 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token)
                     .getPayload();
             return claims.getId();
+        } catch (Exception e) {
+            throw new UnauthorizedException("Token inválido o expirado");
+        }
+    }
+
+    public Integer getTokenVersionFromToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claims.get("tokenVersion", Integer.class);
         } catch (Exception e) {
             throw new UnauthorizedException("Token inválido o expirado");
         }
