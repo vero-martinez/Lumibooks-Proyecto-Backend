@@ -1,5 +1,6 @@
 package com.lumibooks.backend.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,5 +21,11 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     // Tokens no revocados de un usuario (para logout / limpiar sesiones)
     List<RefreshToken> findByUserIdAndRevokedFalse(Long userId);
+
+    // Borrar tokens ya expirados (limpieza diaria)
+    void deleteByExpiresAtBefore(LocalDateTime now);
+
+    // Borrar tokens revocados que tengan más de 1 día (limpieza diaria)
+    void deleteByRevokedTrueAndCreatedAtBefore(LocalDateTime cutoff);
 
 }
