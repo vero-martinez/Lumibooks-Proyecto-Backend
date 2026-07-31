@@ -13,9 +13,13 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.lumibooks.backend.entity.User;
+import com.lumibooks.backend.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Filtro encargado de autenticar usuarios mediante JWT.
@@ -41,6 +45,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     /**
+     * Servicio encargado de la blacklist de tokens JWT en Redis.
+     */
+    private final TokenBlacklistService tokenBlacklistService;
+
+    /**
+     * Repositorio de usuarios para validar tokenVersion y estado activo.
+     */
+    private final UserRepository userRepository;
+
+    /**
      * Método ejecutado automáticamente en cada request HTTP.
      *
      * Realiza el proceso de autenticación basado en JWT.
@@ -63,35 +77,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Extraer token JWT desde el header Authorization
             String token = extractToken(request);
 
-            // Validar token
+            // Validar firma y expiración del token
             if (token != null &&
                     jwtTokenProvider.validateToken(token)) {
 
-                // Obtener email almacenado en el token
-                String email =
-                        jwtTokenProvider.getEmailFromToken(token);
+                // Rechazar tokens revocados en la blacklist de Redis
+                String jti = jwtTokenProvider.getJtiFromToken(token);
 
-                // Cargar usuario desde base de datos
-                UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(email);
+                if (!tokenBlacklistService.isBlacklisted(jti)) {
 
-                // Crear autenticación para Spring Security
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
+                    // Obtener email almacenado en el token
+                    String email =
+                            jwtTokenProvider.getEmailFromToken(token);
+
+                    // Cargar usuario desde base de datos para validar su estado
+                    User user = userRepository.findByEmail(email).orElse(null);
+
+                    // Validar cuenta activa y que el tokenVersion coincida
+                    if (user != null && user.isActive()
+                            && Objects.equals(user.getTokenVersion(),
+                                    jwtTokenProvider.getTokenVersionFromToken(token))) {
+
+                        // Cargar detalles de usuario para Spring Security
+                        UserDetails userDetails =
+                                userDetailsService.loadUserByUsername(email);
+
+                        // Crear autenticación para Spring Security
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails,
+                                        null,
+                                        userDetails.getAuthorities()
+                                );
+
+                        // Agregar detalles adicionales de la request
+                        authentication.setDetails(
+                                new WebAuthenticationDetailsSource()
+                                        .buildDetails(request)
                         );
 
-                // Agregar detalles adicionales de la request
-                authentication.setDetails(
-                        new WebAuthenticationDetailsSource()
-                                .buildDetails(request)
-                );
-
-                // Registrar usuario autenticado en el contexto de seguridad
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authentication);
+                        // Registrar usuario autenticado en el contexto de seguridad
+                        SecurityContextHolder.getContext()
+                                .setAuthentication(authentication);
+                    }
+                }
             }
 
         } catch (Exception e) {
