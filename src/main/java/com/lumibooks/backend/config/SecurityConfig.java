@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.lumibooks.backend.security.JwtAuthenticationFilter;
+import com.lumibooks.backend.security.RateLimitFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final CorsConfigurationSource corsConfigurationSource;
 
     /**
@@ -84,6 +86,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/manager/**").hasRole("GESTOR")
                         .anyRequest().authenticated()
                 );
+
+        // Agregar el filtro de rate limiting antes del filtro JWT
+        http.addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class);
 
         // Agregar JwtAuthenticationFilter antes de UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
