@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lumibooks.backend.dto.user.request.UserCreateRequest;
+import com.lumibooks.backend.dto.user.request.UserProfileUpdateRequest;
 import com.lumibooks.backend.dto.user.request.UserUpdateRequest;
 import com.lumibooks.backend.dto.user.response.UserAdminDetailResponse;
+import com.lumibooks.backend.dto.user.response.UserMeResponse;
 import com.lumibooks.backend.dto.user.response.UserSummaryResponse;
 import com.lumibooks.backend.entity.User;
 import com.lumibooks.backend.enums.ActionType;
@@ -19,6 +21,7 @@ import com.lumibooks.backend.exception.BadRequestException;
 import com.lumibooks.backend.exception.ResourceNotFoundException;
 import com.lumibooks.backend.mapper.UserMapper;
 import com.lumibooks.backend.repository.UserRepository;
+import com.lumibooks.backend.security.AuthenticatedUserProvider;
 import com.lumibooks.backend.service.ActionLogService;
 import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.service.UserService;
@@ -37,6 +40,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
     private final NotificationService notificationService;
     private final ActionLogService actionLogService;
@@ -121,6 +125,24 @@ public class UserServiceImpl implements UserService {
         actionLogService.log(ActionType.EDITAR, EntityType.USER, saved.getId(),
                 "Editó el usuario '" + saved.getFullName() + "'");
         return userMapper.toAdminDetailResponse(saved);
+    }
+
+    // ============ Perfil propio (/me) ============
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserMeResponse getMyProfile() {
+        User user = authenticatedUserProvider.getAuthenticatedUser();
+        return userMapper.toMeResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public UserMeResponse updateMyProfile(UserProfileUpdateRequest request) {
+        User user = authenticatedUserProvider.getAuthenticatedUser();
+        userMapper.updateMeEntity(request, user);
+        User saved = userRepository.save(user);
+        return userMapper.toMeResponse(saved);
     }
 
 }
