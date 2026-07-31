@@ -101,6 +101,13 @@
     		<version>2.0.0</version>
 		</dependency>
 
+		<!-- Redis para la blacklist de tokens JWT -->
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>
