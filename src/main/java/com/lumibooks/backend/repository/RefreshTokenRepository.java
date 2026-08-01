@@ -6,7 +6,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lumibooks.backend.entity.RefreshToken;
 
@@ -27,5 +32,11 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
 
     // Borrar tokens revocados que tengan más de 1 día (limpieza diaria)
     void deleteByRevokedTrueAndCreatedAtBefore(LocalDateTime cutoff);
+
+    // Revocar una familia en transacción independiente (se confirma aunque la operación falle)
+    @Modifying
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query("UPDATE RefreshToken t SET t.revoked = true WHERE t.familyId = :familyId")
+    int revokeFamilyNow(@Param("familyId") UUID familyId);
 
 }
