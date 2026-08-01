@@ -81,8 +81,9 @@ public class RefreshTokenService {
                 .orElseThrow(() -> new UnauthorizedException("Sesión inválida o expirada"));
 
         // ¿Este token YA fue reemplazado? => alguien lo está reusando (robo) => matar la familia
+        // La revocación va en transacción independiente para que el rollback del 401 no la deshaga
         if (old.getReplacedBy() != null) {
-            revokeFamily(old.getFamilyId());
+            refreshTokenRepository.revokeFamilyNow(old.getFamilyId());
             throw new UnauthorizedException("Se detectó un reuso del token de sesión");
         }
         if (old.isRevoked()) {
