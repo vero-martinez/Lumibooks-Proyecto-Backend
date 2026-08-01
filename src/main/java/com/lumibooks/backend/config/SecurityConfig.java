@@ -87,11 +87,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-        // Agregar el filtro de rate limiting antes del filtro JWT
-        http.addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class);
-
-        // Agregar JwtAuthenticationFilter antes de UsernamePasswordAuthenticationFilter
+        // Primero se registra el orden del filtro JWT (anclado a un filtro built-in)
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // Luego el rate limit se ancla ANTES del filtro JWT (que ya tiene orden registrado)
+        http.addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }
