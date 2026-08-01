@@ -14,7 +14,7 @@ import com.lumibooks.backend.dto.response.AuthResult;
 import com.lumibooks.backend.entity.User;
 import com.lumibooks.backend.enums.RoleUser;
 import com.lumibooks.backend.exception.BadRequestException;
-import com.lumibooks.backend.exception.ResourceNotFoundException;
+import com.lumibooks.backend.exception.UnauthorizedException;
 import com.lumibooks.backend.repository.UserRepository;
 import com.lumibooks.backend.security.JwtTokenProvider;
 import com.lumibooks.backend.security.RefreshTokenService;
@@ -88,8 +88,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResult login(LoginRequest loginRequest) {
 
+        // Mismo mensaje para email inexistente y contraseña incorrecta
+        // para no revelar qué emails están registrados (evitar user enumeration)
         User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("Email o contraseña incorrectos"));
 
         try {
             authenticationManager.authenticate(
@@ -99,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
                     )
             );
         } catch (Exception e) {
-            throw new BadRequestException("Email o contraseña incorrectos");
+            throw new UnauthorizedException("Email o contraseña incorrectos");
         }
 
         return buildAuthResult(user, "Inicio de sesión exitoso");
