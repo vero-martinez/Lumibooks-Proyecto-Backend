@@ -16,38 +16,30 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Clase encargada de gestionar operaciones relacionadas con JWT.
+ * Componente encargado de crear y validar tokens JWT.
  *
- * Funciones principales:
- * - Generar tokens JWT para usuarios autenticados.
- * - Extraer información del token, como el email.
- * - Validar si un token es válido o ha expirado.
+ * Permite generar tokens para usuarios autenticados y obtener
+ * información almacenada dentro del token, como email, rol y versión.
  */
 @Component
 public class JwtTokenProvider {
 
-    /**
-     * Clave secreta utilizada para firmar y verificar los tokens JWT.
-     * Se obtiene desde application.properties.
-     */
+    // Clave secreta utilizada para firmar y verificar los JWT.
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    /**
-     * Tiempo de expiración del token en milisegundos.
-     * Se obtiene desde application.properties.
-     */
+    // Tiempo de vida del Access Token en milisegundos.
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
-    /**
-     * Clave criptográfica utilizada para firmar los JWT.
-     */
+    // Clave criptográfica utilizada para firmar los tokens.
     private SecretKey key;
 
     /**
-     * Inicializa la clave criptográfica a partir del secret configurado.
-     * Se ejecuta automáticamente después de crear el bean.
+     * Inicializa la clave criptográfica usada para firmar y validar JWT.
+     *
+     * Convierte el secreto configurado en application.properties
+     * en una clave HMAC que será utilizada al generar y verificar tokens.
      */
     @PostConstruct
     public void init() {
@@ -56,9 +48,13 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Genera un token JWT para el usuario autenticado.
+     * Genera un Access Token JWT para un usuario autenticado.
      *
-     * @return token JWT generado
+     * El token incluye:
+     * - Email del usuario como identificador principal.
+     * - Rol para controlar permisos.
+     * - Token version para invalidar sesiones anteriores.
+     * - JTI para identificar el token individualmente.
      */
     public String generateToken(User user) {
 
@@ -77,11 +73,9 @@ public class JwtTokenProvider {
     }
 
     /**
-     * Obtiene el email almacenado dentro del token JWT.
+     * Obtiene el email almacenado dentro del JWT.
      *
-     * @param token token JWT
-     * @return email almacenado en el token
-     * @throws UnauthorizedException si el token es inválido o expiró
+     * @throws UnauthorizedException si el token es inválido o expiró.
      */
     public String getEmailFromToken(String token) {
 
@@ -102,6 +96,12 @@ public class JwtTokenProvider {
         }
     }
 
+    /**
+     * Obtiene el identificador único del JWT (JTI).
+     *
+     * Se utiliza para identificar un token específico,
+     * por ejemplo al manejar revocaciones.
+     */
     public String getJtiFromToken(String token) {
         try {
             Claims claims = Jwts.parser()
@@ -109,12 +109,20 @@ public class JwtTokenProvider {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
+
             return claims.getId();
+
         } catch (Exception e) {
             throw new UnauthorizedException("Token inválido o expirado");
         }
     }
 
+    /**
+     * Obtiene la versión del token almacenada dentro del JWT.
+     *
+     * Permite comprobar si el token pertenece a la versión actual
+     * del usuario o si fue invalidado por un cambio de versión.
+     */
     public Integer getTokenVersionFromToken(String token) {
         try {
             Claims claims = Jwts.parser()
@@ -122,22 +130,21 @@ public class JwtTokenProvider {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
+
             return claims.get("tokenVersion", Integer.class);
+
         } catch (Exception e) {
             throw new UnauthorizedException("Token inválido o expirado");
         }
     }
 
     /**
-     * Valida si un token JWT es válido.
+     * Verifica si un JWT es válido.
      *
-     * Verifica:
-     * - firma correcta
-     * - token no expirado
-     * - token no alterado
-     *
-     * @param token token JWT
-     * @return true si el token es válido, false en caso contrario
+     * Comprueba:
+     * - Que la firma sea correcta.
+     * - Que el token no haya expirado.
+     * - Que el contenido no haya sido alterado.
      */
     public boolean validateToken(String token) {
 
