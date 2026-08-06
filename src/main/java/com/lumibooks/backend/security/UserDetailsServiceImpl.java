@@ -11,31 +11,44 @@ import com.lumibooks.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Implementación de UserDetailsService para cargar los detalles del usuario desde la base de datos.
- * Funciones principales:
- * - Cargar un usuario por su email (username) para la autenticación.
- * - Convertir la entidad User a un objeto UserDetails que Spring Security pueda utilizar para la autenticación y autorización.
- * - Manejar casos donde el usuario no se encuentra lanzando una excepción adecuada.
+ * Implementación de UserDetailsService utilizada por Spring Security.
+ *
+ * Permite cargar la información del usuario desde la base de datos
+ * durante el proceso de autenticación.
  */
 @Service
-@RequiredArgsConstructor // Anotación de Lombok para generar un constructor con los campos finales
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    /**
+     * Busca un usuario por email y lo convierte al formato
+     * UserDetails que Spring Security utiliza internamente.
+     *
+     * @param username email del usuario autenticado
+     * @return información de autenticación del usuario
+     * @throws UsernameNotFoundException si el usuario no existe
+     */
     @Override
-    // Cargar un usuario por su email (username) para la autenticación
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "Usuario no encontrado con email: " + username));
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
 
-        return org.springframework.security.core.userdetails.User.builder() // Convertir la entidad User a un objeto UserDetails
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "Usuario no encontrado con email: " + username));
+
+        return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-                .authorities("ROLE_" + user.getRole().name()) // Aquí se podrían agregar roles o permisos si se implementan
-                .accountLocked(!user.isActive()) // Si el campo "isActive" es false, la cuenta se considera bloqueada
+
+                // Spring Security utiliza este formato para validar roles.
+                .authorities("ROLE_" + user.getRole().name())
+
+                // Una cuenta inactiva no podrá autenticarse.
+                .accountLocked(!user.isActive())
+
                 .build();
     }
 }
