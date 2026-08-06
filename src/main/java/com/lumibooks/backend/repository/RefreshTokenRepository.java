@@ -15,25 +15,33 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.lumibooks.backend.entity.RefreshToken;
 
+/**
+ * Repositorio para gestionar los Refresh Tokens.
+ */
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 
-    // Buscar el token por su hash SHA-256 (para validarlo al refrescar)
+    // Busca un Refresh Token por su hash.
     Optional<RefreshToken> findByTokenHash(String tokenHash);
 
-    // Todos los tokens de una familia (para matar la familia si hay reuso)
+    // Obtiene todos los Refresh Tokens de una misma familia.
     List<RefreshToken> findByFamilyId(UUID familyId);
 
-    // Tokens no revocados de un usuario (para logout / limpiar sesiones)
+    // Obtiene los Refresh Tokens activos de un usuario.
     List<RefreshToken> findByUserIdAndRevokedFalse(Long userId);
 
-    // Borrar tokens ya expirados (limpieza diaria)
+    // Elimina los Refresh Tokens que ya expiraron.
     void deleteByExpiresAtBefore(LocalDateTime now);
 
-    // Borrar tokens revocados que tengan más de 1 día (limpieza diaria)
+    // Elimina los Refresh Tokens revocados con más de un día de antigüedad.
     void deleteByRevokedTrueAndCreatedAtBefore(LocalDateTime cutoff);
 
-    // Revocar una familia en transacción independiente (se confirma aunque la operación falle)
+    /**
+     * Revoca todos los Refresh Tokens de una misma familia.
+     *
+     * Se ejecuta en una transacción independiente para asegurar
+     * que el cambio se confirme incluso si la operación principal falla.
+     */
     @Modifying
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Query("UPDATE RefreshToken t SET t.revoked = true WHERE t.familyId = :familyId")

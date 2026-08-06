@@ -10,22 +10,24 @@ import org.springframework.stereotype.Repository;
 import com.lumibooks.backend.entity.User;
 import com.lumibooks.backend.enums.RoleUser;
 
+/**
+ * Repositorio para acceder y consultar usuarios.
+ */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
-    // Encontrar un usuario por su email
+    // Busca un usuario por su correo electrónico.
     Optional<User> findByEmail(String email);
 
-    // Validar que el email y dni no estén duplicados
+    // Comprueba si el correo o DNI ya existen.
     boolean existsByEmail(String email);
     boolean existsByDni(String dni);
 
-    // Validar duplicados excluyendo el propio usuario (para update)
+    // Comprueba duplicados excluyendo al usuario que se está actualizando.
     boolean existsByEmailAndIdNot(String email, Long id);
     boolean existsByDniAndIdNot(String dni, Long id);
 
-    // Obtener todos los usuarios activos con un rol específico 
-    // (usado para notificar a admin cuando el stock de un libro se agota)
+    // Obtiene los usuarios activos con un rol específico.
     List<User> findByRoleAndIsActiveTrue(RoleUser role);
 
 }
