@@ -12,33 +12,28 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 /**
  * Configura las políticas CORS de la aplicación.
  *
- * Permite definir qué orígenes, métodos HTTP y encabezados
- * pueden acceder al backend desde aplicaciones frontend externas.
- *
- * Esta configuración es necesaria cuando el frontend y backend
- * se ejecutan en dominios o puertos diferentes.
+ * Permite controlar qué aplicaciones frontend pueden comunicarse
+ * con el backend cuando se ejecutan en diferentes dominios o puertos.
  */
 @Configuration
 public class CorsConfig {
 
+        // Orígenes permitidos para realizar peticiones al backend.
+        // Se obtiene según el perfil activo (dev/prod).
         @Value("${app.cors.allowed-origins}")
         private List<String> allowedOrigins;
 
-        /**
-         * Define la configuración CORS global de la aplicación.
-         *
-         * @return configuración CORS utilizada por Spring Security
-         */
+        // Crear la configuración CORS utilizada por Spring Security.
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
 
-                // Crear configuración CORS
+                // Crear configuración de políticas CORS.
                 CorsConfiguration configuration = new CorsConfiguration();
 
-                // Permitir peticiones desde el frontend (definido por perfil: dev/prod)
+                // Permitir peticiones desde los frontend configurados.
                 configuration.setAllowedOrigins(allowedOrigins);
 
-                // Permitir métodos HTTP específicos
+                // Permitir los métodos HTTP utilizados por la aplicación.
                 configuration.setAllowedMethods(
                                 List.of(
                                                 "GET",
@@ -48,20 +43,20 @@ public class CorsConfig {
                                                 "PATCH",
                                                 "OPTIONS"));
 
-                // Permitir todos los encabezados HTTP
+                // Permitir todos los encabezados HTTP enviados en las solicitudes.
                 configuration.setAllowedHeaders(List.of("*"));
 
-                // Permitir envío de credenciales y tokens
+                // Permitir el envío de cookies y credenciales en las peticiones.
                 configuration.setAllowCredentials(true);
 
-                // Tiempo en segundos que el navegador almacenará la configuración CORS, para no preguntar en cada solicitud
+                // Tiempo que el navegador almacena la configuración CORS
+                // antes de realizar nuevamente una solicitud preflight.
                 configuration.setMaxAge(3600L);
 
-                // Aplicar configuración a todas las rutas de la aplicación
-                UrlBasedCorsConfigurationSource source = 
-                        new UrlBasedCorsConfigurationSource();
+                // Aplicar la configuración CORS a todas las rutas del backend.
+                UrlBasedCorsConfigurationSource source =
+                                new UrlBasedCorsConfigurationSource();
 
-                // Registrar la configuración CORS para todas las rutas
                 source.registerCorsConfiguration("/**", configuration);
 
                 return source;
