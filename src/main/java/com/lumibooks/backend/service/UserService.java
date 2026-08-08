@@ -4,10 +4,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.lumibooks.backend.dto.user.request.UserCreateRequest;
+import com.lumibooks.backend.dto.user.request.UserProfileUpdateRequest;
 import com.lumibooks.backend.dto.user.request.UserUpdateRequest;
 import com.lumibooks.backend.dto.user.response.UserAdminDetailResponse;
+import com.lumibooks.backend.dto.user.response.UserMeResponse;
 import com.lumibooks.backend.dto.user.response.UserSummaryResponse;
 import com.lumibooks.backend.enums.RoleUser;
+import com.lumibooks.backend.exception.ResourceNotFoundException;
 
 /**
  * Interfaz para la gestión de usuarios.
@@ -57,5 +60,15 @@ public interface UserService {
      * @throws BadRequestException si el email o DNI ya existen
      */
     UserAdminDetailResponse updateUser(Long id, UserUpdateRequest request);
+
+    /**
+     * Retorna el perfil del usuario autenticado.
+     */
+    UserMeResponse getMyProfile();
+
+    /**
+     * Actualiza los datos básicos del propio perfil del usuario autenticado.
+     */
+    UserMeResponse updateMyProfile(UserProfileUpdateRequest request);
 
 }
