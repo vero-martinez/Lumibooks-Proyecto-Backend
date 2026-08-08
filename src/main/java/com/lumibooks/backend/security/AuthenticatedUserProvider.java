@@ -11,7 +11,10 @@ import com.lumibooks.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Componente que provee el usuario autenticado en el contexto de seguridad actual.
+ * Componente encargado de obtener el usuario actualmente autenticado.
+ *
+ * Utiliza el contexto de seguridad de Spring Security para identificar
+ * al usuario mediante el email almacenado en la autenticación actual.
  */
 @Component
 @RequiredArgsConstructor
@@ -20,15 +23,25 @@ public class AuthenticatedUserProvider {
     private final UserRepository userRepository;
 
     /**
-     * Retorna la entidad User del usuario autenticado en la sesión actual.
+     * Obtiene la entidad User del usuario autenticado.
+     *
+     * Spring Security guarda la información del usuario autenticado
+     * después de validar correctamente el JWT.
+     *
      * @return usuario autenticado
      * @throws ResourceNotFoundException si el usuario no existe en la BD
      */
     public User getAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-    }
 
+        Authentication authentication =
+                SecurityContextHolder.getContext()
+                        .getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Usuario no encontrado"));
+    }
 }

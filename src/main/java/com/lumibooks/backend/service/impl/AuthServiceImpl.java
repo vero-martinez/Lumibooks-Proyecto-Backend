@@ -1,5 +1,6 @@
 package com.lumibooks.backend.service.impl;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,12 +10,16 @@ import org.springframework.transaction.annotation.Transactional;
 import com.lumibooks.backend.dto.request.LoginRequest;
 import com.lumibooks.backend.dto.request.RegisterRequest;
 import com.lumibooks.backend.dto.response.AuthResponse;
+import com.lumibooks.backend.dto.response.AuthResult;
 import com.lumibooks.backend.entity.User;
 import com.lumibooks.backend.enums.RoleUser;
 import com.lumibooks.backend.exception.BadRequestException;
-import com.lumibooks.backend.exception.ResourceNotFoundException;
+import com.lumibooks.backend.exception.UnauthorizedException;
 import com.lumibooks.backend.repository.UserRepository;
 import com.lumibooks.backend.security.JwtTokenProvider;
+import com.lumibooks.backend.security.RefreshTokenService;
+import com.lumibooks.backend.security.RefreshTokenService.RotateResult;
+import com.lumibooks.backend.security.TokenBlacklistService;
 import com.lumibooks.backend.service.AuthService;
 import com.lumibooks.backend.service.NotificationService;
 import com.lumibooks.backend.service.SubscriberService;
@@ -23,40 +28,58 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Implementación del servicio de autenticación.
- * Se encarga del registro de usuarios,
- * validación de credenciales y generación de tokens JWT.
+ *
+ * Gestiona el registro, inicio de sesión, renovación y cierre
+ * de sesión de los usuarios.
  */
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+    // Repositorio para acceder a los usuarios.
     private final UserRepository userRepository;
+
+    // Codificador de contraseñas.
     private final PasswordEncoder passwordEncoder;
+
+    // Encargado de autenticar las credenciales del usuario.
     private final AuthenticationManager authenticationManager;
+
+    // Generador y validador de Access Tokens JWT.
     private final JwtTokenProvider jwtTokenProvider;
+
+    // Gestión de Refresh Tokens.
+    private final RefreshTokenService refreshTokenService;
+
+    // Blacklist de Access Tokens en Redis.
+    private final TokenBlacklistService tokenBlacklistService;
+
+    // Gestión de suscripciones al newsletter.
     private final SubscriberService subscriberService;
 
+    // Envío de notificaciones a los usuarios.
     private final NotificationService notificationService;
 
-    /**
-     * Registra un nuevo usuario en el sistema.
-     *
-     * @param registerRequest datos del usuario a registrar
-     * @return respuesta con token JWT y datos del usuario registrado
-     * @throws BadRequestException si el email o DNI ya existen
-     */
+    // Tiempo de vida del Access Token.
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
+
+    // Registrar un nuevo usuario e iniciar su sesión.
     @Override
     @Transactional
-    public AuthResponse register(RegisterRequest registerRequest) {
+    public AuthResult register(RegisterRequest registerRequest) {
 
+        // Verificar que el email no esté registrado.
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             throw new BadRequestException("El email ya está registrado");
         }
 
+        // Verificar que el DNI no esté registrado.
         if (userRepository.existsByDni(registerRequest.getDni())) {
             throw new BadRequestException("El DNI ya está registrado");
         }
 
+        // Crear y guardar el nuevo usuario.
         User newUser = User.builder()
                 .firstName(registerRequest.getFirstName())
                 .lastName(registerRequest.getLastName())
@@ -70,66 +93,98 @@ public class AuthServiceImpl implements AuthService {
 
         User savedUser = userRepository.save(newUser);
 
-        // Suscribe al newsletter si el usuario lo solicitó
+        // Suscribir al usuario al newsletter si lo solicitó durante el registro.
         if (Boolean.TRUE.equals(registerRequest.getSubscribedToNewsletter())) {
             subscriberService.subscribeFromRegister(savedUser);
         }
 
+        // Enviar una notificación de bienvenida.
         notificationService.sendNotification(
                 savedUser,
                 "¡Bienvenido a LumiBooks!",
                 "Hola " + savedUser.getFullName()
                         + ", gracias por unirte a LumiBooks. ¡Esperamos que disfrutes tu experiencia!");
 
-        // Genera el token JWT del usuario registrado
-        String token = jwtTokenProvider.generateToken(savedUser.getEmail());
-
-        return AuthResponse.builder()
-                .token(token)
-                .firstName(savedUser.getFirstName())
-                .lastName(savedUser.getLastName())
-                .email(savedUser.getEmail())
-                .role(savedUser.getRole().toString())
-                .message("Usuario registrado exitosamente")
-                .build();
+        return buildAuthResult(savedUser, "Usuario registrado exitosamente");
     }
 
-    /**
-     * Autentica un usuario existente.
-     *
-     * @param loginRequest credenciales del usuario
-     * @return respuesta con token JWT y datos del usuario autenticado
-     * @throws ResourceNotFoundException si el usuario no existe
-     * @throws BadRequestException si las credenciales son incorrectas
-     */
+    // Autenticar a un usuario con sus credenciales.
     @Override
-    @Transactional(readOnly = true)
-    public AuthResponse login(LoginRequest loginRequest) {
+    @Transactional
+    public AuthResult login(LoginRequest loginRequest) {
 
+        // Mismo mensaje para email inexistente y contraseña incorrecta
         User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+                .orElseThrow(() -> new UnauthorizedException("Email o contraseña incorrectos"));
 
+        // Validar las credenciales del usuario.
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getEmail(),
-                            loginRequest.getPassword()
-                    )
-            );
+                            loginRequest.getPassword()));
         } catch (Exception e) {
-            throw new BadRequestException("Email o contraseña incorrectos");
+            throw new UnauthorizedException("Email o contraseña incorrectos");
         }
 
-        // Genera el token JWT del usuario autenticado
-        String token = jwtTokenProvider.generateToken(user.getEmail());
+        return buildAuthResult(user, "Inicio de sesión exitoso");
+    }
 
-        return AuthResponse.builder()
-                .token(token)
+    // Renovar la sesión utilizando un Refresh Token válido.
+    @Override
+    @Transactional
+    public AuthResult refresh(String rawRefreshToken) {
+
+        // Rotar el Refresh Token y obtener uno nuevo.
+        RotateResult rotated = refreshTokenService.rotate(rawRefreshToken);
+
+        return buildAuthResult(rotated.user(), rotated.rawToken(), "Sesión renovada");
+    }
+
+    // Cerrar la sesión e invalidar los tokens del usuario.
+    @Override
+    @Transactional
+    public void logout(String accessToken, String rawRefreshToken) {
+
+        // Agregar el Access Token a la blacklist para impedir su uso hasta que expire.
+        if (accessToken != null && !accessToken.isBlank()) {
+            try {
+                if (jwtTokenProvider.validateToken(accessToken)) {
+                    tokenBlacklistService.blacklist(
+                            jwtTokenProvider.getJtiFromToken(accessToken),
+                            jwtExpiration);
+                }
+            } catch (Exception ignored) {
+                // Si el token ya expiró o es inválido, no es necesario agregarlo a la blacklist.
+            }
+        }
+
+        // Revocar la familia del Refresh Token para impedir futuras renovaciones de la sesión.
+        if (rawRefreshToken != null && !rawRefreshToken.isBlank()) {
+            refreshTokenService.revokeFamilyByToken(rawRefreshToken);
+        }
+    }
+
+    // Generar un Access Token y un Refresh Token para una nueva sesión.
+    private AuthResult buildAuthResult(User user, String message) {
+        return buildAuthResult(user, refreshTokenService.issue(user), message);
+    }
+
+    // Generar un Access Token utilizando un Refresh Token ya emitido.
+    private AuthResult buildAuthResult(User user, String rawRefreshToken, String message) {
+
+        String accessToken = jwtTokenProvider.generateToken(user);
+
+        // Construir la respuesta que se enviará al cliente.
+        AuthResponse response = AuthResponse.builder()
+                .token(accessToken)
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .role(user.getRole().toString())
-                .message("Inicio de sesión exitoso")
+                .message(message)
                 .build();
+
+        return new AuthResult(response, rawRefreshToken);
     }
 }

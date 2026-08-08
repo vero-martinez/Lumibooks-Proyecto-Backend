@@ -1,5 +1,8 @@
 package com.lumibooks.backend.config;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -9,61 +12,53 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 /**
  * Configura las políticas CORS de la aplicación.
  *
- * Permite definir qué orígenes, métodos HTTP y encabezados
- * pueden acceder al backend desde aplicaciones frontend externas.
- *
- * Esta configuración es necesaria cuando el frontend y backend
- * se ejecutan en dominios o puertos diferentes.
+ * Permite controlar qué aplicaciones frontend pueden comunicarse
+ * con el backend cuando se ejecutan en diferentes dominios o puertos.
  */
 @Configuration
 public class CorsConfig {
 
-    /**
-     * Define la configuración CORS global de la aplicación.
-     *
-     * @return configuración CORS utilizada por Spring Security
-     */
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+        // Orígenes permitidos para realizar peticiones al backend.
+        // Se obtiene según el perfil activo (dev/prod).
+        @Value("${app.cors.allowed-origins}")
+        private List<String> allowedOrigins;
 
-        // Crear configuración CORS
-        CorsConfiguration configuration = new CorsConfiguration();
+        // Crear la configuración CORS utilizada por Spring Security.
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
 
-        // Permitir peticiones desde el frontend
-        configuration.setAllowedOrigins(
-                java.util.List.of("http://localhost:3000")
-        );
+                // Crear configuración de políticas CORS.
+                CorsConfiguration configuration = new CorsConfiguration();
 
-        // Permitir métodos HTTP específicos
-        configuration.setAllowedMethods(
-                java.util.List.of(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "DELETE",
-                        "PATCH",
-                        "OPTIONS"
-                )
-        );
+                // Permitir peticiones desde los frontend configurados.
+                configuration.setAllowedOrigins(allowedOrigins);
 
-        // Permitir todos los encabezados HTTP
-        configuration.setAllowedHeaders(
-                java.util.List.of("*")
-        );
+                // Permitir los métodos HTTP utilizados por la aplicación.
+                configuration.setAllowedMethods(
+                                List.of(
+                                                "GET",
+                                                "POST",
+                                                "PUT",
+                                                "DELETE",
+                                                "PATCH",
+                                                "OPTIONS"));
 
-        // Permitir envío de credenciales y tokens
-        configuration.setAllowCredentials(true);
+                // Permitir todos los encabezados HTTP enviados en las solicitudes.
+                configuration.setAllowedHeaders(List.of("*"));
 
-        // Tiempo en segundos que el navegador almacenará la configuración CORS, para no preguntar en cada solicitud
-        configuration.setMaxAge(3600L);
+                // Permitir el envío de cookies y credenciales en las peticiones.
+                configuration.setAllowCredentials(true);
 
-        // Aplicar configuración a todas las rutas de la aplicación
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-        
-        // Registrar la configuración CORS para todas las rutas
-        source.registerCorsConfiguration("/**", configuration);
+                // Tiempo que el navegador almacena la configuración CORS
+                // antes de realizar nuevamente una solicitud preflight.
+                configuration.setMaxAge(3600L);
 
-        return source;
-    }
+                // Aplicar la configuración CORS a todas las rutas del backend.
+                UrlBasedCorsConfigurationSource source =
+                                new UrlBasedCorsConfigurationSource();
+
+                source.registerCorsConfiguration("/**", configuration);
+
+                return source;
+        }
 }

@@ -5,25 +5,37 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * DTO utilizado para enviar la respuesta de una autenticación exitosa.
+ *
+ * Contiene el Access Token y la información básica del usuario
+ * autenticado.
+ */
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
-/**
- * Clase DTO (Data Transfer Object) para enviar los datos de respuesta de autenticación.
- * 
- * Funciones principales:
- * - Contiene la información necesaria para responder a una solicitud de autenticación exitosa.
- * - Incluye el token JWT, los datos del usuario y un mensaje de confirmación.
- */
 public class AuthResponse {
 
-    private String token; // Token JWT generado para el usuario autenticado
+    // Access Token JWT generado para el usuario autenticado.
+    private String token;
+
+    // Tipo de token utilizado para la autenticación.
     @Builder.Default
-    private String tokenType = "Bearer"; // Tipo de token, generalmente "Bearer"
-    private String email; // Email del usuario autenticado
-    private String firstName; // Nombre del usuario autenticado
-    private String lastName; // Apellido del usuario autenticado
-    private String role; // Rol del usuario autenticado
-    private String message; // Mensaje adicional, como "Inicio de sesión exitoso"
+    private String tokenType = "Bearer";
+
+    // Correo electrónico del usuario.
+    private String email;
+
+    // Nombre del usuario.
+    private String firstName;
+
+    // Apellido del usuario.
+    private String lastName;
+
+    // Rol asignado al usuario.
+    private String role;
+
+    // Mensaje descriptivo del resultado de la autenticación.
+    private String message;
 }

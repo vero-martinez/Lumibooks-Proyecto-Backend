@@ -78,8 +78,21 @@ public class UserMapper {
         Optional.ofNullable(request.getFirstName()).ifPresent(user::setFirstName);
         Optional.ofNullable(request.getLastName()).ifPresent(user::setLastName);
         Optional.ofNullable(request.getCellphone()).ifPresent(user::setCellphone);
-        Optional.ofNullable(request.getRole()).ifPresent(user::setRole);
-        Optional.ofNullable(request.getIsActive()).ifPresent(user::setActive);
+
+        boolean rolCambia = request.getRole() != null && !request.getRole().equals(user.getRole());
+        boolean estadoCambia = request.getIsActive() != null && !request.getIsActive().equals(user.isActive());
+
+        if (rolCambia) {
+            user.setRole(request.getRole());
+        }
+        if (estadoCambia) {
+            user.setActive(request.getIsActive());
+        }
+
+        // Cambios de seguridad: invalida los access tokens vigentes
+        if (rolCambia || estadoCambia) {
+            user.setTokenVersion(user.getTokenVersion() + 1);
+        }
     }
 
     public void updateMeEntity(UserProfileUpdateRequest request, User user) {

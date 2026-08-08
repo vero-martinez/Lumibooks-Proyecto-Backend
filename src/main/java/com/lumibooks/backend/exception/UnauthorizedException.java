@@ -1,16 +1,21 @@
 package com.lumibooks.backend.exception;
 
-// Excepción personalizada para errores de autorización
+/**
+ * Excepción personalizada para errores de autorización.
+ *
+ * Se utiliza cuando un usuario no tiene permisos o credenciales
+ * válidas para realizar una operación.
+ */
 public class UnauthorizedException extends RuntimeException {
-    
-    // Constructor con mensaje personalizado
+
+    // Crea una excepción con un mensaje descriptivo.
     public UnauthorizedException(String message) {
         super(message);
     }
-    
-    // Constructor con mensaje personalizado y causa
+
+    // Crea una excepción con mensaje y la causa original del error.
     public UnauthorizedException(String message, Throwable cause) {
         super(message, cause);
     }
-    
+
 }
