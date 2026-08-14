@@ -30,11 +30,17 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     // Obtiene los Refresh Tokens activos de un usuario.
     List<RefreshToken> findByUserIdAndRevokedFalse(Long userId);
 
-    // Elimina los Refresh Tokens que ya expiraron.
-    void deleteByExpiresAtBefore(LocalDateTime now);
+    // Elimina los Refresh Tokens que ya expiraron (borrado masivo en un solo SQL).
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM RefreshToken t WHERE t.expiresAt < :now")
+    int deleteByExpiresAtBefore(@Param("now") LocalDateTime now);
 
     // Elimina los Refresh Tokens revocados con más de un día de antigüedad.
-    void deleteByRevokedTrueAndCreatedAtBefore(LocalDateTime cutoff);
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM RefreshToken t WHERE t.revoked = true AND t.createdAt < :cutoff")
+    int deleteByRevokedTrueAndCreatedAtBefore(@Param("cutoff") LocalDateTime cutoff);
 
     /**
      * Revoca todos los Refresh Tokens de una misma familia.
