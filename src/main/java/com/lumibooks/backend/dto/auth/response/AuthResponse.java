@@ -1,4 +1,4 @@
-package com.lumibooks.backend.dto.response;
+package com.lumibooks.backend.dto.auth.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,4 +38,5 @@ public class AuthResponse {
 
     // Mensaje descriptivo del resultado de la autenticación.
     private String message;
+    
 }
