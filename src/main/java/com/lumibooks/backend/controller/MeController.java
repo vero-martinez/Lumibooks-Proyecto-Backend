@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lumibooks.backend.dto.response.ApiResponse;
+import com.lumibooks.backend.dto.user.request.ChangePasswordRequest;
 import com.lumibooks.backend.dto.user.request.UserProfileUpdateRequest;
 import com.lumibooks.backend.dto.user.response.UserMeResponse;
 import com.lumibooks.backend.service.UserService;
@@ -39,6 +41,20 @@ public class MeController {
     public ResponseEntity<UserMeResponse> updateMyProfile(
             @RequestBody @Valid UserProfileUpdateRequest request) {
         return ResponseEntity.ok(userService.updateMyProfile(request));
+    }
+
+    /**
+     * Cambia la contraseña del usuario autenticado.
+     * Invalida todas las sesiones existentes (el usuario debe volver a iniciar sesión).
+     */
+    @PatchMapping("/password")
+    public ResponseEntity<ApiResponse> changeMyPassword(
+            @RequestBody @Valid ChangePasswordRequest request) {
+        userService.changeMyPassword(request);
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .message("Contraseña actualizada exitosamente")
+                        .build());
     }
 
 }

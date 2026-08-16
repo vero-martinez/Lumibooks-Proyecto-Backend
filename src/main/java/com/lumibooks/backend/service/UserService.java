@@ -3,6 +3,7 @@ package com.lumibooks.backend.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.lumibooks.backend.dto.user.request.ChangePasswordRequest;
 import com.lumibooks.backend.dto.user.request.UserCreateRequest;
 import com.lumibooks.backend.dto.user.request.UserProfileUpdateRequest;
 import com.lumibooks.backend.dto.user.request.UserUpdateRequest;
@@ -18,14 +19,16 @@ import com.lumibooks.backend.exception.ResourceNotFoundException;
 public interface UserService {
 
     /**
-     * Retorna usuarios con filtros dinámicos para la tabla de administración.
+     * Obtiene una página de usuarios para el panel de administración,
+     * aplicando los filtros y criterios de ordenamiento indicados.
+     *
      * @param search   búsqueda por nombre, apellido o nombre completo
      * @param dni      búsqueda por DNI exacto
-     * @param email    búsqueda por email
+     * @param email    búsqueda por correo electrónico
      * @param role     filtro por rol
-     * @param isActive filtro por estado activo/inactivo
+     * @param isActive filtro por estado activo o inactivo
      * @param pageable paginación y ordenamiento
-     * @return página de usuarios en formato resumen
+     * @return página de usuarios en formato resumido
      */
     Page<UserSummaryResponse> getUsersAdmin(
             String search,
@@ -36,39 +39,56 @@ public interface UserService {
             Pageable pageable);
 
     /**
-     * Retorna el detalle completo de un usuario para el panel de administración.
+     * Obtiene el detalle completo de un usuario para el panel de administración.
+     *
      * @param id identificador del usuario
-     * @return detalle completo del usuario
+     * @return información detallada del usuario
      * @throws ResourceNotFoundException si el usuario no existe
      */
     UserAdminDetailResponse getUserDetailAdmin(Long id);
 
     /**
      * Crea un nuevo usuario desde el panel de administración.
+     *
      * @param request datos del usuario a crear
-     * @return detalle del usuario creado
-     * @throws BadRequestException si el email o DNI ya existen
+     * @return información detallada del usuario creado
+     * @throws BadRequestException si el correo electrónico o DNI ya existen
      */
     UserAdminDetailResponse createUser(UserCreateRequest request);
 
     /**
-     * Actualiza un usuario existente.
+     * Actualiza los datos de un usuario existente desde el panel de administración.
+     *
      * @param id      identificador del usuario
-     * @param request campos a actualizar
-     * @return detalle del usuario actualizado
+     * @param request datos a actualizar
+     * @return información detallada del usuario actualizado
      * @throws ResourceNotFoundException si el usuario no existe
-     * @throws BadRequestException si el email o DNI ya existen
      */
     UserAdminDetailResponse updateUser(Long id, UserUpdateRequest request);
 
     /**
-     * Retorna el perfil del usuario autenticado.
+     * Obtiene el perfil del usuario autenticado.
+     *
+     * @return información del perfil del usuario autenticado
      */
     UserMeResponse getMyProfile();
 
     /**
-     * Actualiza los datos básicos del propio perfil del usuario autenticado.
+     * Actualiza los datos básicos del perfil del usuario autenticado.
+     *
+     * @param request datos del perfil a actualizar
+     * @return información actualizada del perfil
      */
     UserMeResponse updateMyProfile(UserProfileUpdateRequest request);
+
+    /**
+     * Cambia la contraseña del usuario autenticado.
+     * Verifica la contraseña actual e invalida las sesiones existentes
+     * después de realizar el cambio.
+     *
+     * @param request contraseña actual y nueva contraseña
+     * @throws BadRequestException si la contraseña actual es incorrecta
+     */
+    void changeMyPassword(ChangePasswordRequest request);
 
 }
