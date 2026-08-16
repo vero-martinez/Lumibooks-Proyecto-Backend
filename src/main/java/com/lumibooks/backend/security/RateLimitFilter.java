@@ -46,7 +46,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
     // Rutas donde se aplicará el límite de solicitudes.
     private static final Set<String> RATE_LIMITED_PATHS = Set.of(
             "/api/public/auth/login",
-            "/api/public/auth/refresh");
+            "/api/public/auth/register",
+            "/api/public/auth/refresh",
+            "/api/public/auth/forgot-password",
+            "/api/public/auth/reset-password"
+    );
 
     // Almacena un bucket independiente para cada dirección IP.
     private final Map<String, IpBucket> buckets = new ConcurrentHashMap<>();

@@ -7,10 +7,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lumibooks.backend.dto.request.LoginRequest;
-import com.lumibooks.backend.dto.request.RegisterRequest;
-import com.lumibooks.backend.dto.response.AuthResponse;
-import com.lumibooks.backend.dto.response.AuthResult;
+import com.lumibooks.backend.dto.auth.request.LoginRequest;
+import com.lumibooks.backend.dto.auth.request.RegisterRequest;
+import com.lumibooks.backend.dto.auth.response.AuthResponse;
+import com.lumibooks.backend.dto.auth.response.AuthResult;
 import com.lumibooks.backend.entity.User;
 import com.lumibooks.backend.enums.RoleUser;
 import com.lumibooks.backend.exception.BadRequestException;

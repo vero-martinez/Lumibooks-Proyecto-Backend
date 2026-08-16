@@ -1,4 +1,4 @@
-package com.lumibooks.backend.dto.request;
+package com.lumibooks.backend.dto.auth.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
