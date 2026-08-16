@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * Utiliza el algoritmo Token Bucket mediante Bucket4j para evitar
  * ataques de fuerza bruta limitando intentos por dirección IP.
  */
-@Component
 @RequiredArgsConstructor
 public class RateLimitFilter extends OncePerRequestFilter {
 
@@ -46,7 +44,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
     // Rutas donde se aplicará el límite de solicitudes.
     private static final Set<String> RATE_LIMITED_PATHS = Set.of(
             "/api/public/auth/login",
-            "/api/public/auth/refresh");
+            "/api/public/auth/register",
+            "/api/public/auth/refresh",
+            "/api/public/auth/forgot-password",
+            "/api/public/auth/reset-password"
+    );
 
     // Almacena un bucket independiente para cada dirección IP.
     private final Map<String, IpBucket> buckets = new ConcurrentHashMap<>();
