@@ -7,14 +7,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lumibooks.backend.dto.request.LoginRequest;
-import com.lumibooks.backend.dto.request.RegisterRequest;
+import com.lumibooks.backend.dto.auth.request.ForgotPasswordRequest;
+import com.lumibooks.backend.dto.auth.request.LoginRequest;
+import com.lumibooks.backend.dto.auth.request.RegisterRequest;
+import com.lumibooks.backend.dto.auth.request.ResetPasswordRequest;
+import com.lumibooks.backend.dto.auth.response.AuthResponse;
+import com.lumibooks.backend.dto.auth.response.AuthResult;
 import com.lumibooks.backend.dto.response.ApiResponse;
-import com.lumibooks.backend.dto.response.AuthResponse;
-import com.lumibooks.backend.dto.response.AuthResult;
 import com.lumibooks.backend.exception.UnauthorizedException;
 import com.lumibooks.backend.security.RefreshTokenCookieUtil;
 import com.lumibooks.backend.service.AuthService;
+import com.lumibooks.backend.service.PasswordResetService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,6 +37,9 @@ public class AuthController {
 
     // Utilidad para gestionar la cookie del Refresh Token.
     private final RefreshTokenCookieUtil refreshTokenCookieUtil;
+
+    // Servicio encargado de la recuperación de contraseña.
+    private final PasswordResetService passwordResetService;
 
     // Registrar un nuevo usuario e iniciar su sesión.
     @PostMapping("/register")
@@ -111,6 +117,32 @@ public class AuthController {
         return ResponseEntity.ok(
                 ApiResponse.builder()
                         .message("Sesión cerrada exitosamente")
+                        .build());
+    }
+
+     // Enviar un código de recuperación al correo del usuario.
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+
+        passwordResetService.requestReset(forgotPasswordRequest);
+
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .message("Si el email está registrado, recibirás un código de recuperación")
+                        .build());
+    }
+
+    // Restablecer la contraseña con el código recibido.
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+
+        passwordResetService.resetPassword(resetPasswordRequest);
+
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .message("Contraseña actualizada exitosamente")
                         .build());
     }
 }
