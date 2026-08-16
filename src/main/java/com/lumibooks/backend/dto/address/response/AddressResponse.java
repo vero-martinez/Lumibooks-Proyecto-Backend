@@ -1,5 +1,6 @@
 package com.lumibooks.backend.dto.address.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lumibooks.backend.dto.department.response.DepartmentPublicResponse;
 import com.lumibooks.backend.dto.district.response.DistrictPublicResponse;
 import com.lumibooks.backend.dto.province.response.ProvincePublicResponse;
@@ -19,6 +20,7 @@ public class AddressResponse {
     private DistrictPublicResponse district;
     private String addressLine;
     private String reference;
+    @JsonProperty("isDefault")
     private boolean isDefault;
 
 }
