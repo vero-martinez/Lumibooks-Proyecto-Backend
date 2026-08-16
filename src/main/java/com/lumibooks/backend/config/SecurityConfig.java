@@ -12,7 +12,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lumibooks.backend.security.JwtAuthenticationFilter;
 import com.lumibooks.backend.security.RateLimitFilter;
 import com.lumibooks.backend.security.JwtAccessDeniedHandler;
@@ -78,22 +77,6 @@ public class SecurityConfig {
 
         // Obtener el AuthenticationManager configurado por Spring.
         return config.getAuthenticationManager();
-    }
-
-
-    /**
-     * Crea el filtro de rate limiting como bean explícito.
-     *
-     * Se registra manualmente en la cadena de seguridad para que
-     * no corra como filtro global del contenedor de servlets.
-     *
-     * @param objectMapper convierte los objetos de respuesta a JSON.
-     * @return filtro de limitación de intentos por IP.
-     */
-    @Bean
-    public RateLimitFilter rateLimitFilter(ObjectMapper objectMapper) {
-
-        return new RateLimitFilter(objectMapper);
     }
 
 
