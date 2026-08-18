@@ -83,7 +83,6 @@ public class OrderServiceImpl implements OrderService {
         }
 
         Address address = getAddressOrThrow(addressId, user);
-        validateShippingAvailable(address);
 
         return orderMapper.toCheckoutPreviewResponse(cart, address);
     }
