@@ -33,6 +33,22 @@ public class OrderSpecification {
                 "%" + name.toLowerCase() + "%");
     }
 
+    // Búsqueda genérica: OR entre número de orden, DNI y nombre del cliente
+    public static Specification<Order> hasSearch(String search) {
+        return (root, query, cb) -> {
+            var userJoin = root.join("user");
+            String pattern = "%" + search.toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("orderNumber")), pattern),
+                    cb.like(userJoin.get("dni"), pattern),
+                    cb.or(
+                            cb.like(cb.lower(userJoin.get("firstName")), pattern),
+                            cb.like(cb.lower(userJoin.get("lastName")), pattern)
+                    )
+            );
+        };
+    }
+
     // Filtrar por estado
     public static Specification<Order> hasStatus(OrderStatus status) {
         return (root, query, cb) -> cb.equal(root.get("status"), status);

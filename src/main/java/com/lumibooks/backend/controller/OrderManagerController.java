@@ -31,15 +31,13 @@ public class OrderManagerController {
 
     @GetMapping
     public ResponseEntity<Page<OrderAdminSummaryResponse>> getManagerOrders(
-            @RequestParam(required = false) String orderNumber,
-            @RequestParam(required = false) String dni,
-            @RequestParam(required = false) String clientName,
+            @RequestParam(required = false) String search,
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo,
             Pageable pageable) {
         return ResponseEntity.ok(orderService.getManagerOrders(
-                orderNumber, dni, clientName, status, dateFrom, dateTo, pageable));
+                search, status, dateFrom, dateTo, pageable));
     }
 
     @GetMapping("/{orderId}")

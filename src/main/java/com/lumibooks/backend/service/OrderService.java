@@ -56,9 +56,7 @@ public interface OrderService {
 
     /**
      * Retorna las órdenes asignadas al gestor autenticado con filtros dinámicos.
-     * @param orderNumber búsqueda por número de orden
-     * @param dni búsqueda por DNI
-     * @param clientName búsqueda por nombre del cliente
+     * @param search búsqueda genérica por número de orden, DNI o nombre del cliente
      * @param status filtro por estado
      * @param dateFrom filtro por fecha desde
      * @param dateTo filtro por fecha hasta
@@ -66,9 +64,7 @@ public interface OrderService {
      * @return página de órdenes del gestor
      */
     Page<OrderAdminSummaryResponse> getManagerOrders(
-            String orderNumber,
-            String dni,
-            String clientName,
+            String search,
             OrderStatus status,
             java.time.LocalDate dateFrom,
             java.time.LocalDate dateTo,
