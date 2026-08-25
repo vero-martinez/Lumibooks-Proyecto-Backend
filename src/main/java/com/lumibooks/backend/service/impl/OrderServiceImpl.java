@@ -83,7 +83,6 @@ public class OrderServiceImpl implements OrderService {
         }
 
         Address address = getAddressOrThrow(addressId, user);
-        validateShippingAvailable(address);
 
         return orderMapper.toCheckoutPreviewResponse(cart, address);
     }
@@ -182,23 +181,15 @@ public class OrderServiceImpl implements OrderService {
     // ==== Método para obtener órdenes asignadas al gestor con filtros =====
     @Override
     public Page<OrderAdminSummaryResponse> getManagerOrders(
-            String orderNumber, String dni, String clientName,
+            String search,
             OrderStatus status, LocalDate dateFrom, LocalDate dateTo,
             Pageable pageable) {
 
         User manager = authenticatedUserProvider.getAuthenticatedUser();
-        // Construir la especificación dinámica para filtrar las órdenes asignadas al
-        // gestor
         Specification<Order> spec = OrderSpecification.assignedToManager(manager.getId());
 
-        if (orderNumber != null && !orderNumber.isBlank()) {
-            spec = spec.and(OrderSpecification.orderNumberContains(orderNumber));
-        }
-        if (dni != null && !dni.isBlank()) {
-            spec = spec.and(OrderSpecification.hasDni(dni));
-        }
-        if (clientName != null && !clientName.isBlank()) {
-            spec = spec.and(OrderSpecification.clientNameContains(clientName));
+        if (search != null && !search.isBlank()) {
+            spec = spec.and(OrderSpecification.hasSearch(search));
         }
         if (status != null) {
             spec = spec.and(OrderSpecification.hasStatus(status));

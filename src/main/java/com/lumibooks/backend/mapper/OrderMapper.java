@@ -103,6 +103,8 @@ public class OrderMapper {
         }
 
         public CheckoutAddressResponse toCheckoutAddressResponse(Address address) {
+
+                boolean shippingAvailable = address.getDistrict().isShippingAvailable();
                 return CheckoutAddressResponse.builder()
                                 .id(address.getId())
                                 .addressLine(address.getAddressLine())
@@ -110,8 +112,8 @@ public class OrderMapper {
                                 .districtName(address.getDistrict().getName())
                                 .provinceName(address.getDistrict().getProvince().getName())
                                 .departmentName(address.getDistrict().getProvince().getDepartment().getName())
-                                .shippingCost(address.getDistrict().getShippingCost())
-                                .isShippingAvailable(address.getDistrict().isShippingAvailable())
+                                .shippingCost(shippingAvailable ? address.getDistrict().getShippingCost() : null)
+                                .isShippingAvailable(shippingAvailable)
                                 .build();
         }
 
@@ -124,7 +126,8 @@ public class OrderMapper {
                                 .map(OrderItemResponse::getSubtotal)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                BigDecimal shippingCost = address.getDistrict().getShippingCost();
+                boolean shippingAvailable = address.getDistrict().isShippingAvailable();
+                BigDecimal shippingCost = shippingAvailable ? address.getDistrict().getShippingCost() : BigDecimal.ZERO;
 
                 return CheckoutPreviewResponse.builder()
                                 .items(items)

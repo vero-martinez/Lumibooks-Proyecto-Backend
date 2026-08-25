@@ -2,6 +2,8 @@ package com.lumibooks.backend.dto.order.response;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -20,6 +22,7 @@ public class CheckoutAddressResponse {
     private String provinceName;
     private String departmentName;
     private BigDecimal shippingCost;
+    @JsonProperty("isShippingAvailable")
     private boolean isShippingAvailable;
 
 }
