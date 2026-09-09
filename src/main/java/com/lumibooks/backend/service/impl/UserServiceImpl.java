@@ -1,5 +1,7 @@
 package com.lumibooks.backend.service.impl;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,6 +13,7 @@ import com.lumibooks.backend.dto.user.request.ChangePasswordRequest;
 import com.lumibooks.backend.dto.user.request.UserCreateRequest;
 import com.lumibooks.backend.dto.user.request.UserProfileUpdateRequest;
 import com.lumibooks.backend.dto.user.request.UserUpdateRequest;
+import com.lumibooks.backend.dto.user.response.GestorSummaryResponse;
 import com.lumibooks.backend.dto.user.response.UserAdminDetailResponse;
 import com.lumibooks.backend.dto.user.response.UserMeResponse;
 import com.lumibooks.backend.dto.user.response.UserSummaryResponse;
@@ -79,6 +82,18 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.findAll(spec, pageable)
                 .map(userMapper::toSummaryResponse);
+    }
+
+    // Obtiene la lista de gestores activos para este panel de administración.
+    @Override
+    public List<GestorSummaryResponse> getGestoresActivos() {
+        return userRepository.findByRoleAndIsActiveTrue(RoleUser.GESTOR)
+                .stream()
+                .map(user -> GestorSummaryResponse.builder()
+                        .id(user.getId())
+                        .fullName(user.getFullName())
+                        .build())
+                .toList();
     }
 
     // Obtiene el detalle de un usuario para el panel de administración.
