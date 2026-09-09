@@ -268,22 +268,15 @@ public class OrderServiceImpl implements OrderService {
     // =====
     @Override
     public Page<OrderAdminSummaryResponse> getOrdersAdmin(
-            String orderNumber, String dni, String clientName,
-            OrderStatus status, Long managerId,
+            String search, OrderStatus status, Long managerId,
             LocalDate dateFrom, LocalDate dateTo,
             Pageable pageable) {
         // Construir la especificación dinámica para filtrar las órdenes según los
         // parámetros recibidos
         Specification<Order> spec = Specification.unrestricted();
 
-        if (orderNumber != null && !orderNumber.isBlank()) {
-            spec = spec.and(OrderSpecification.orderNumberContains(orderNumber));
-        }
-        if (dni != null && !dni.isBlank()) {
-            spec = spec.and(OrderSpecification.hasDni(dni));
-        }
-        if (clientName != null && !clientName.isBlank()) {
-            spec = spec.and(OrderSpecification.clientNameContains(clientName));
+        if (search != null && !search.isBlank()) {
+            spec = spec.and(OrderSpecification.hasSearch(search));
         }
         if (status != null) {
             spec = spec.and(OrderSpecification.hasStatus(status));

@@ -91,9 +91,7 @@ public interface OrderService {
 
     /**
      * Retorna todas las órdenes con filtros dinámicos para el panel de administración.
-     * @param orderNumber búsqueda por número de orden
-     * @param dni búsqueda por DNI
-     * @param clientName búsqueda por nombre del cliente
+     * @param search búsqueda por número de orden, DNI, nombre o apellido del cliente
      * @param status filtro por estado
      * @param managerId filtro por gestor
      * @param dateFrom filtro por fecha desde
@@ -102,9 +100,7 @@ public interface OrderService {
      * @return página de órdenes
      */
     Page<OrderAdminSummaryResponse> getOrdersAdmin(
-            String orderNumber,
-            String dni,
-            String clientName,
+            String search,
             OrderStatus status,
             Long managerId,
             java.time.LocalDate dateFrom,
