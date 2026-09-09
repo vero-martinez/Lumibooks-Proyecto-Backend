@@ -1,5 +1,7 @@
 package com.lumibooks.backend.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -7,6 +9,7 @@ import com.lumibooks.backend.dto.user.request.ChangePasswordRequest;
 import com.lumibooks.backend.dto.user.request.UserCreateRequest;
 import com.lumibooks.backend.dto.user.request.UserProfileUpdateRequest;
 import com.lumibooks.backend.dto.user.request.UserUpdateRequest;
+import com.lumibooks.backend.dto.user.response.GestorSummaryResponse;
 import com.lumibooks.backend.dto.user.response.UserAdminDetailResponse;
 import com.lumibooks.backend.dto.user.response.UserMeResponse;
 import com.lumibooks.backend.dto.user.response.UserSummaryResponse;
@@ -38,6 +41,13 @@ public interface UserService {
             Boolean isActive,
             Pageable pageable);
 
+    /**
+     * Obtiene la lista de gestores activos para el panel de administración.
+     * Usado en selectores de asignación (p.ej. asignar un gestor a una orden).
+     *
+     * @return lista de gestores activos
+     */
+    List<GestorSummaryResponse> getGestoresActivos();
     /**
      * Obtiene el detalle completo de un usuario para el panel de administración.
      *
