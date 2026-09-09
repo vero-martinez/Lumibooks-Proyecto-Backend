@@ -1,5 +1,7 @@
 package com.lumibooks.backend.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lumibooks.backend.dto.user.request.UserCreateRequest;
 import com.lumibooks.backend.dto.user.request.UserUpdateRequest;
+import com.lumibooks.backend.dto.user.response.GestorSummaryResponse;
 import com.lumibooks.backend.dto.user.response.UserAdminDetailResponse;
 import com.lumibooks.backend.dto.user.response.UserSummaryResponse;
 import com.lumibooks.backend.enums.RoleUser;
@@ -56,6 +59,16 @@ public class UserAdminController {
             @RequestParam(required = false) Boolean isActive,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity.ok(userService.getUsersAdmin(search, dni, email, role, isActive, pageable));
+    }
+
+    /**
+     * Retorna la lista de gestores activos para selectores de asignación.
+     *
+     * @return lista de gestores activos
+     */
+    @GetMapping("/gestores")
+    public ResponseEntity<List<GestorSummaryResponse>> getGestoresActivos() {
+        return ResponseEntity.ok(userService.getGestoresActivos());
     }
 
     /**
