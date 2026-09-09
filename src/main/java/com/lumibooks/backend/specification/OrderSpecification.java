@@ -33,19 +33,23 @@ public class OrderSpecification {
                 "%" + name.toLowerCase() + "%");
     }
 
-    // Búsqueda genérica: OR entre número de orden, DNI y nombre del cliente
+    // Búsqueda genérica: OR entre número de orden, DNI y nombre completo del cliente
     public static Specification<Order> hasSearch(String search) {
         return (root, query, cb) -> {
             var userJoin = root.join("user");
-            String pattern = "%" + search.toLowerCase() + "%";
+            String pattern = "%" + search.toLowerCase().trim() + "%";
+
+            var fullName = cb.lower(
+                    cb.concat(
+                            cb.concat(userJoin.get("firstName"), " "),
+                            userJoin.get("lastName")));
+
             return cb.or(
                     cb.like(cb.lower(root.get("orderNumber")), pattern),
                     cb.like(userJoin.get("dni"), pattern),
-                    cb.or(
-                            cb.like(cb.lower(userJoin.get("firstName")), pattern),
-                            cb.like(cb.lower(userJoin.get("lastName")), pattern)
-                    )
-            );
+                    cb.like(cb.lower(userJoin.get("firstName")), pattern),
+                    cb.like(cb.lower(userJoin.get("lastName")), pattern),
+                    cb.like(fullName, pattern));
         };
     }
 
